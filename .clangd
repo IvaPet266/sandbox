@@ -1,0 +1,8 @@
+CompileFlags:
+  Add: 
+    - -std=c++20
+    - -IС:/msys64/mingw64/include
+    - -IС:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/11.2.0/include
+    - -IС:/msys64/mingw64/lib/gcc/x86_64-w64-mingw32/11.2.0/include/c++
+  CompilationDatabase:
+    build

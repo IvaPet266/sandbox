@@ -1,0 +1,3 @@
+C:/Users/shosh/vscode_projects/cpp/project/reference/CMakeFiles/Proj.dir
+C:/Users/shosh/vscode_projects/cpp/project/reference/CMakeFiles/edit_cache.dir
+C:/Users/shosh/vscode_projects/cpp/project/reference/CMakeFiles/rebuild_cache.dir
