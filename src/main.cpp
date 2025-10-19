@@ -22,6 +22,7 @@
 #include <stdexcept>
 #include <memory>
 #include <chrono>
+#include <functional>
 
 using namespace std::chrono;
 
@@ -62,9 +63,12 @@ public:
   };
 
   // Для примера 2 указателя:
-  EventHandler  *event_handler = nullptr; // — "сырой" указатель.
-  std::unique_ptr<DrawInterface> drawler; // — "умный" указатель.
+  // static EventHandler  *event_handler = nullptr; // — "сырой" указатель.
+  static std::unique_ptr<EventHandler> event_handler; // — "умный" указатель.
+  static std::unique_ptr<DrawInterface> drawler; // — "умный" указатель.
+  TimeManager timer;
 
+  std::chrono::steady_clock SteadyClock = std::chrono::steady_clock();
 
   GameLoop() {
     if ( SDL_Init( SDL_INIT_VIDEO ) != 0 ) { // — `SDL_INIT_VIDEO` уже включает `SDL_INIT_EVENTS`.
@@ -72,7 +76,8 @@ public:
     }
     
     
-    event_handler = new EventHandler(window_config, *this); // — "сырой" указатель.
+    // event_handler = EventHandler(window_config, *this); // — "сырой" указатель.
+    event_handler = std::make_unique<EventHandler>(window_config, *this); // — "умный" указатель.
     drawler       = std::make_unique<DrawInterface>(window_config);     // — "умный" указатель.
     
     Particle::init(&window_config, drawler.get());
@@ -81,14 +86,14 @@ public:
 
   ~GameLoop() { 
 
-    if ( event_handler ) delete event_handler; //  — динамически выделенная память освобождается вручную.
+    // if ( event_handler ) delete event_handler; //  — динамически выделенная память освобождается вручную.
     // if (drawler)         delete drawler;      //! — эта команда НЕ нужна, так как используется "умный" указатель.
     
     SDL_Quit();
 }
 
 
-  void update() { // — максимум кадров в секунду.
+  static void update() { // — максимум кадров в секунду.
     // Рисование частиц:
     if ( event_handler->is_left_down ) {
 
@@ -109,27 +114,45 @@ public:
     // Particle::update_all();
   }
 
+  static void fixed_update() { // — 60 кадров в секунду.
 
-  void fixed_update() { // — 60 кадров в секунду.
-    
     // Торможение частиц:
     Particle::frame_step();
   }
+  
+  bool check_events_quit() {
+    if (event_handler->quit) return true;
+    return false;
+  }
 
+  static void render() {
+    GameLoop::fixed_update();
 
+    GameLoop::drawler->render();
+  }
+
+  static bool handle_events() {
+    event_handler->handle_events();
+    return event_handler->flag_run;
+  }
+  
   void run() {
-
+    
     Uint32 last_render_time = 0;  // — время последнего рендера.
-    Uint32 frame_count      = 0;  // — счётчик кадров для FPS.
     Uint32 fps_timer        = 0;  // — таймер для вывода FPS.
 
-    while( event_handler->flag_run ) {
-      frame_count ++;
-      event_handler->handle_events();
-      if (event_handler->quit) return;
+    std::function<void()> render_= render;
+    timer(16, render_);
+    
+    std::function<bool()> handle_events_ = handle_events;
+    timer(-1, handle_events_);
 
-      
-
+    std::function<void()> update_ = update;
+    timer(-1, update_);
+    
+    
+    timer.start_ticking();
+    
       // if (start) { //todo информационный текст пикселями
       //   Text t;
       //   auto text = t.get_text();
@@ -142,36 +165,7 @@ public:
       //     drawler->draw_pixel( pos, { .r = i[2][0], .g = i[2][1], .b = i[2][2] });
       //   }
       // }
-
-
-      const Uint32 current_time = SDL_GetTicks();
-      const Uint32 elapsed_time = current_time - last_render_time;
-
-      
-      // Рендер с фиксированным интервалом 60 FPS:
-      if(elapsed_time >= 16) {
-//                       ^
-//                       1000ms / 60 ~ 16.666ms
-        
-        fixed_update();
-
-        drawler->render();
-
-        last_render_time = current_time;
-        frame_count++;
-
-        if ( current_time - fps_timer >= 1000 ) {
-
-            print("FPS: ", frame_count ); // * — вывод FPS в консоль.
-
-            frame_count = 0;
-            fps_timer = current_time;
-            
-        }
-      }
-
-      SDL_Delay(1); // — снижение нагрузки на CPU.
-    }
+    return;
   }
 };
 
