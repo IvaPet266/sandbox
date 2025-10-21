@@ -59,4 +59,4 @@ if exist %VAR_PROJECT_NAME%.exe (
   REM Запускаем сборку:
   %VAR_PROJECT_NAME%
 )
-
+ 

@@ -9,7 +9,7 @@
 #include <WindowConfig.hpp>
 #include <EventTriggers.hpp>
 #include <DrawInterface.hpp>
-#include "../text/text.cpp"
+// #include "../text/text.cpp"
 #include <Timer.hpp>
 
 // Есть 2 реализации:
@@ -66,7 +66,7 @@ public:
   // static EventHandler  *event_handler = nullptr; // — "сырой" указатель.
   static std::unique_ptr<EventHandler> event_handler; // — "умный" указатель.
   static std::unique_ptr<DrawInterface> drawler; // — "умный" указатель.
-  TimeManager timer;
+  // TimeManager timer;
 
   std::chrono::steady_clock SteadyClock = std::chrono::steady_clock();
 
@@ -131,27 +131,24 @@ public:
     GameLoop::drawler->render();
   }
 
-  static bool handle_events() {
-    event_handler->handle_events();
-    return event_handler->flag_run;
-  }
+  // static bool handle_events() {
+  //   event_handler->handle_events();
+  //   return event_handler->flag_run;
+  // }
   
   void run() {
     
     Uint32 last_render_time = 0;  // — время последнего рендера.
     Uint32 fps_timer        = 0;  // — таймер для вывода FPS.
 
-    std::function<void()> render_= render;
-    timer(16, render_);
+    // timer(16, render);
     
-    std::function<bool()> handle_events_ = handle_events;
-    timer(-1, handle_events_);
+    // timer(-1, handle_events);
 
-    std::function<void()> update_ = update;
-    timer(-1, update_);
+    // timer(-1, update);
     
     
-    timer.start_ticking();
+    // timer.start_ticking();
     
       // if (start) { //todo информационный текст пикселями
       //   Text t;
