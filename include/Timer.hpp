@@ -1,65 +1,27 @@
-// #include "SDL2/SDL_stdinc.h"
-// #include "WindowConfig.hpp"
-// #include <DrawInterface.hpp>
-// #include <functional>
-// #include <particles/ParticleStatic.hpp>
-// #include <EventTriggers.hpp>
-// #include <SDL2/SDL_timer.h>
+#include <chrono>
+#include <functional>
+#include <iostream>
 
-// #include <memory>
-// #include <map>
-// #include <vector>
-// #include <chrono>
+using namespace std::chrono;
 
 
-// using namespace std::chrono;
-
-
-// class TimeManager {
-// protected:
-//     std::function<void()> render;
-//     std::function<void()> update;
-//     std::function<bool()> handle_events;
-
-
-//     std::chrono::steady_clock SteadyClock = std::chrono::steady_clock();
+class TimeManager {
+private:
+    milliseconds STEP;
+    time_point<std::chrono::steady_clock> st_tp;
+    std::function<void()> task;
+public:
+    TimeManager (milliseconds step, std::function<void()> func) : STEP(step), task(func), st_tp(steady_clock::now()) {};
     
-//     std::chrono::time_point<std::chrono::steady_clock> start_time;
-//     Uint32 query_size = 10;
+    void tick() {
+        auto frame_tp = steady_clock::now();
 
-//     bool ticking = true;
-// public:
-//     void operator() (int intervalMs, std::function<void()> new_task) {
+        auto delta = frame_tp - st_tp;
+        if (delta >= STEP) {
+            std::cout << "tick" << std::endl;
+            task();
+            st_tp = steady_clock::now();
+        };
+    };
+};
 
-        
-//     }
-
-
-//     void set_ticking(bool new_instance) {
-//         ticking = new_instance;
-//     }
-
-//     void start_ticking() {
-//         start_time = SteadyClock.now();
-//         Uint8 frame_count = 0;
-//         while (ticking) {
-            
-//             auto frame_time = SteadyClock.now();
-//             Uint16 elapsed_time = std::chrono::duration_cast<milliseconds>(frame_time - start_time).count();
-            
-//             if (elapsed_time % 16 == 0) {
-//                 frame_count++;
-
-//                 SDL_Delay(1); // — снижение нагрузки на CPU.
-//             } else if (elapsed_time >= 1000) {
-//                 print("FPS:", frame_count);
-//                 frame_count = 0;
-//                 start_time = SteadyClock.now();
-//             } else {
-
-//             }
-//         }
-//         return;
-//     }
-    
-// };

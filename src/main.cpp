@@ -66,7 +66,6 @@ public:
   // static EventHandler  *event_handler = nullptr; // — "сырой" указатель.
   static std::unique_ptr<EventHandler> event_handler; // — "умный" указатель.
   static std::unique_ptr<DrawInterface> drawler; // — "умный" указатель.
-  // TimeManager timer;
 
   std::chrono::steady_clock SteadyClock = std::chrono::steady_clock();
 
@@ -82,7 +81,6 @@ public:
     
     Particle::init(&window_config, drawler.get());
   }
-
 
   ~GameLoop() { 
 
@@ -119,53 +117,40 @@ public:
     // Торможение частиц:
     Particle::frame_step();
   }
-  
-  bool check_events_quit() {
-    if (event_handler->quit) return true;
-    return false;
-  }
 
   static void render() {
     GameLoop::fixed_update();
 
     GameLoop::drawler->render();
   }
-
-  // static bool handle_events() {
-  //   event_handler->handle_events();
-  //   return event_handler->flag_run;
-  // }
   
   void run() {
     
-    Uint32 last_render_time = 0;  // — время последнего рендера.
-    Uint32 fps_timer        = 0;  // — таймер для вывода FPS.
-
-    // timer(16, render);
+    TimeManager ev_h = TimeManager(1ms,  [] () { event_handler->handle_events(); });
+    TimeManager upd  = TimeManager(1ms,  [] () { update(); });
+    TimeManager ren  = TimeManager(16ms, [] () { render(); });
     
-    // timer(-1, handle_events);
-
-    // timer(-1, update);
-    
+    ev_h.tick();
+    upd. tick();
+    ren. tick();
     
     // timer.start_ticking();
     
-      // if (start) { //todo информационный текст пикселями
-      //   Text t;
-      //   auto text = t.get_text();
-      //   for (auto i = text[0].begin(); i != text[0].end(); ++i) {
-      //     Position pos {
-      //       .x=30 + i[0][0],
-      //       .y=70 + i[1][0]
-      //     };
-      //     Particle::create_new(pos, 1);
-      //     drawler->draw_pixel( pos, { .r = i[2][0], .g = i[2][1], .b = i[2][2] });
-      //   }
-      // }
+    // if (start) { //todo информационный текст пикселями
+    //   Text t;
+    //   auto text = t.get_text();
+    //   for (auto i = text[0].begin(); i != text[0].end(); ++i) {
+    //     Position pos {
+    //       .x=30 + i[0][0],
+    //       .y=70 + i[1][0]
+    //     };
+    //     Particle::create_new(pos, 1);
+    //     drawler->draw_pixel( pos, { .r = i[2][0], .g = i[2][1], .b = i[2][2] });
+    //   }
+    // }
     return;
   }
 };
-
 
 
 //* Пример рисования:
@@ -173,7 +158,6 @@ public:
 
 //   game_loop.drawler->draw_pixel(pos, Color::random());
 // }
-
 
 
 //* Пример создания частиц:
@@ -193,8 +177,8 @@ void EventHandler::on_mouse_button_down(Uint8 btn_number) {
     case SDL_BUTTON_RIGHT:
       is_right_down = true;
       break;
-  }
-}
+  };
+};
 
 void EventHandler::on_mouse_button_up(Uint8 btn_number) {
 
@@ -207,8 +191,8 @@ void EventHandler::on_mouse_button_up(Uint8 btn_number) {
     case SDL_BUTTON_RIGHT:
       is_right_down = false;
       break;
-  }
-}
+  };
+};
 
 
 
@@ -225,7 +209,7 @@ int main( int argc, char *argv[] ) {
     GameLoop game_loop;
     game_loop.run();
 
-    if (game_loop.event_handler->quit) return exit_code;
+    // if (game_loop.event_handler->quit) return exit_code;
       
   } catch (const std::exception& exc) { 
     
@@ -235,7 +219,7 @@ int main( int argc, char *argv[] ) {
               << "\n"; 
 
     exit_code = EXIT_FAILURE;
-  }
+  };
 
   return exit_code;
 }

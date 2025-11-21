@@ -12,27 +12,20 @@
 class EventTriggers {
 
 public:
-  bool quit = false;
 
   void handle_events() {
     
     SDL_Event event;
 
     while (SDL_PollEvent(&event)) {
-
       switch(event.type) {
         
         case SDL_QUIT:
-
-          flag_run = false;
-
           break;
 
         case SDL_KEYDOWN:
-
           print(event.key.keysym.sym);
           on_key_down(event.key.keysym.sym);
-
           switch (event.key.keysym.sym) {
             case 27:    //="esc"
               Particle::clear();
@@ -43,56 +36,43 @@ public:
               print("пробел");
               break;
             case 113:   //="q"
-              quit = true;
               return;
-          }
-
+          };
           break;
 
         case SDL_KEYUP:
-
           on_key_up(event.key.keysym.sym);
-
           switch(event.key.keysym.sym) {
             case 27:
               print("escape отжат");
               break;
             case 32:
-              
               print("пробел отжат");
               break;
-          }
-
+          };
           break;
 
         case SDL_MOUSEMOTION:
-
           on_mouse_motion({
               .x = (event.motion.x * window_config.res_w) / window_config.window_w,
               .y = (event.motion.y * window_config.res_h) / window_config.window_h
-          });
-
+            }
+          );
           break;
 
         case SDL_MOUSEBUTTONDOWN:
-
           on_mouse_button_down(event.button.button);
-
           break;
 
         case SDL_MOUSEBUTTONUP:
-
           on_mouse_button_up(event.button.button);
-
           break;
-      }
-    }
-    
-  }
+      };
+    };
+  };
 
 
   WindowConfig& window_config;
-  bool flag_run = true;
 
 
   EventTriggers(WindowConfig& window_config) 
