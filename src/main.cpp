@@ -52,10 +52,10 @@ public:
 class GameLoop { 
 private:
   bool start = true;
-
+  bool run_flag = true;
 public:
 
-  WindowConfig  window_config {
+  static inline WindowConfig  window_config {
     .window_h = 800,
     .window_w = 1100,
     .res_h    = 200,
@@ -64,8 +64,8 @@ public:
 
   // Для примера 2 указателя:
   // static EventHandler  *event_handler = nullptr; // — "сырой" указатель.
-  static std::unique_ptr<EventHandler> event_handler; // — "умный" указатель.
-  static std::unique_ptr<DrawInterface> drawler; // — "умный" указатель.
+  static inline std::unique_ptr<EventHandler> event_handler; // — "умный" указатель.
+  static inline std::unique_ptr<DrawInterface> drawler; // — "умный" указатель.
 
   std::chrono::steady_clock SteadyClock = std::chrono::steady_clock();
 
@@ -93,23 +93,28 @@ public:
 
   static void update() { // — максимум кадров в секунду.
     // Рисование частиц:
-    if ( event_handler->is_left_down ) {
-
-      if ( Particle::create_new( event_handler->pointer_pos, 1 ) ) {
-        
-        drawler->draw_pixel( event_handler->pointer_pos, { .r = 255 });
+    if (not control.get_ctrl()) {
+      if ( event_handler->is_left_down ) {
+  
+        if ( Particle::create_new( event_handler->pointer_pos, 1 ) ) {
+          
+          drawler->draw_pixel( event_handler->pointer_pos, { .r = 255 });
+        }
+  
+      } else if ( event_handler->is_right_down ) {
+  
+        if ( Particle::create_new( event_handler->pointer_pos ) ) {
+          
+          drawler->draw_pixel( event_handler->pointer_pos, { .b = 255 });
+        }
       }
-
-    } else if ( event_handler->is_right_down ) {
-
-      if ( Particle::create_new( event_handler->pointer_pos ) ) {
-        
-        drawler->draw_pixel( event_handler->pointer_pos, { .b = 255 });
-      }
+    } else {
+      // print("clear");
+      drawler->clear_pixel(window_config.pos_to_hash(event_handler->pointer_pos));
     }
 
     // Обновление частиц:
-    // Particle::update_all();
+    Particle::update_all();
   }
 
   static void fixed_update() { // — 60 кадров в секунду.
@@ -126,13 +131,15 @@ public:
   
   void run() {
     
-    TimeManager ev_h = TimeManager(1ms,  [] () { event_handler->handle_events(); });
-    TimeManager upd  = TimeManager(1ms,  [] () { update(); });
+    TimeManager ev_h = TimeManager(0ns,  [] () { event_handler->handle_events(); });
+    TimeManager upd  = TimeManager(0ns,  [] () { update(); });
     TimeManager ren  = TimeManager(16ms, [] () { render(); });
     
-    ev_h.tick();
-    upd. tick();
-    ren. tick();
+    while (control.get_run()) {
+      ev_h.tick();
+      upd. tick();
+      ren. tick();
+    };
     
     // timer.start_ticking();
     

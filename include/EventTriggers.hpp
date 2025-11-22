@@ -1,9 +1,12 @@
+#include "SDL2/SDL_keycode.h"
 #include "SDL2/SDL_stdinc.h"
 #include <SDL2/SDL_events.h>
 
 #include <Position.hpp>
 #include <WindowConfig.hpp>
 #include "particles/ParticleStatic.hpp"
+#include <control.hpp>
+#include <windows.h>
 // #include <iostream>
 
 #pragma once
@@ -21,34 +24,49 @@ public:
       switch(event.type) {
         
         case SDL_QUIT:
-          break;
+          control.set_run(false);
+          // break;
+          return;
 
         case SDL_KEYDOWN:
           print(event.key.keysym.sym);
           on_key_down(event.key.keysym.sym);
           switch (event.key.keysym.sym) {
-            case 27:    //="esc"
+            case SDLK_ESCAPE: //27="esc"
               Particle::clear();
               print("escape");
               break;
-            case 32:    //=" "
-              //todo при нажатом пробеле можно удалять частицы по нажатию
+            case SDLK_SPACE: //32=" "
               print("пробел");
               break;
-            case 113:   //="q"
-              return;
+            case SDLK_q: //113="q"
+            control.set_run(false);
+            // break;
+            return;
+            case SDLK_RCTRL:
+            case SDLK_LCTRL:
+              //todo при нажатом ctrl можно удалять частицы по нажатию
+              if (not control.get_ctrl()) control.set_ctrl(true);
+              break;
+            case SDLK_i:
+              print("particles amount", Particle::_all.size());
           };
           break;
 
         case SDL_KEYUP:
           on_key_up(event.key.keysym.sym);
           switch(event.key.keysym.sym) {
-            case 27:
+            case SDLK_ESCAPE:
               print("escape отжат");
               break;
-            case 32:
+            case SDLK_SPACE:
               print("пробел отжат");
               break;
+            case SDLK_LCTRL:
+            case SDLK_RCTRL:
+              control.set_ctrl(false);
+              break;
+            
           };
           break;
 

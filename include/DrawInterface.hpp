@@ -50,7 +50,7 @@ public:
         renderer = SDL_CreateRenderer(
             window,
             -1,
-            SDL_RENDERER_ACCELERATED //| SDL_RENDERER_PRESENTVSYNC
+            SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
 //                                       ^    ^
 //          аппаратное ускорение отрисовки    вертикальная синхронизация
         );

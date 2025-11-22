@@ -2,6 +2,7 @@
 #include "DrawInterface.hpp"
 #include "SDL2/SDL_stdinc.h"
 #include <WindowConfig.hpp>
+#include "print/terminal.hpp"
 
 #include <iostream>
 #include <exception>
@@ -172,7 +173,7 @@ public:
     int  pos_hash    = drawler->window_config.pos_to_hash(pos);
     bool is_positive = pos_hash > -1;
 
-    if ( is_positive && _all.find(pos_hash) == _all.end()) {
+    if ( is_positive ) {//&& _all.find(pos_hash) == _all.end()) {
 
       auto [ it, inserted ] = _all.try_emplace(pos_hash);
 
