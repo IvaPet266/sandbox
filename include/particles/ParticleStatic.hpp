@@ -27,9 +27,9 @@ protected:
   
   // Объявление сокращённых типов (2 способа):
   // 1. using:
-  using ParticleMap    = std::unordered_map<Uint32, Particle>; // — тип карты частиц.
+  using ParticleMap    = std::unordered_map<int, Particle>; // — тип карты частиц.
   using MapIterator    = ParticleMap::iterator;                // — тип итератора по карте.
-  using ParticleVector = std::vector<Uint32>;
+  using ParticleVector = std::vector<int>;
   // typedef ParticleMap::iterator MapIterator;
   // 2. typedef:
   typedef void (* Behaviour )(MapIterator&);                // — тип поведения частиц.
@@ -109,6 +109,68 @@ public:
     
 
   } // beh_falling.
+
+  static void beh_levitating(MapIterator& iterator) { //todo
+    // Замедление обновления частиц:
+    if ( iterator->second.freq_upd_count > 0 ) {
+      return;
+    }
+    
+    iterator->second.freq_upd_count = FREQ_UPD_LIMIT;
+    //* Падение частиц:
+    
+    // Нахождение позиции:
+    Uint32 pos_hash = iterator->first;
+    
+    Position pos = drawler->window_config.hash_to_pos(pos_hash);
+    
+    Position new_pos = {
+      .x = pos.x,
+      .y = pos.y - 1, // — ось y перевёрнута. 
+    };
+
+    // print(_all);
+    // print(_dynPart);
+    const Uint32 entry_color = drawler->get_pixel(pos_hash);
+
+    if (not drawler->window_config.pos_in_res(drawler->window_config.pos_to_hash(new_pos))) {
+      // print(_all.size());
+      
+      drawler->clear_pixel(pos_hash);
+      _all.extract(iterator); 
+
+      // print(_all.size());
+      // print("=====");
+      return;
+    } else {
+      // print(8);
+      int pos_new_hash = drawler->window_config.pos_to_hash(new_pos);
+      
+      MapIterator other_iterator = _all.find(pos_new_hash);
+      
+      // Если новая позиция НЕ занята:
+      if ( other_iterator == _all.end() ) {
+        // print(9);
+        drawler->draw_pixel(pos_new_hash, entry_color);
+        drawler->clear_pixel(pos_hash);
+        
+        // Отключаем узел карты от карты
+        // (ячейка памяти становится самостоятельной):
+  
+        auto node = _all.extract(iterator);
+  
+        node.key()           = pos_new_hash;
+        
+        auto result          = _all.insert(std::move(node));
+  
+        // _dynPart.push_back(node);
+        // if (result.inserted) { 
+        //   iterator = result.position; // * — идём к только что добавленной сущности.
+        // }
+      }
+    };
+    
+  }
 
 
   // Свойства частицы:
@@ -191,7 +253,11 @@ public:
           _dynPart.emplace_back(pos_hash); //<-
           // print(90);
           return inserted;
-        default:
+        case 2:
+          it->second.behaviour = beh_levitating;
+          _dynPart.emplace_back(pos_hash); //<-
+          return inserted;
+        default: //0
           it->second.behaviour = beh_monolit;
           return inserted;
           // TODO
@@ -211,7 +277,7 @@ public:
     auto it = std::remove_if(
       _dynPart.begin(),
       _dynPart. end(),
-      [] (Uint32 & e) {
+      [] (int & e) {
         auto it_ = _all.find(e);
         if (it_ != _all.end()) {
           // print("00");

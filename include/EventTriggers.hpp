@@ -45,11 +45,24 @@ public:
             return;
             case SDLK_RCTRL:
             case SDLK_LCTRL:
-              //todo при нажатом ctrl можно удалять частицы по нажатию
+              //todo при нажатом ctrl [свободная клавиша]
               if (not control.get_ctrl()) control.set_ctrl(true);
               break;
             case SDLK_i:
               print("particles amount", Particle::_all.size());
+              break;
+            case SDLK_0:
+              control.set_particle_code(0); //beh_monolit
+              print("code", 0);
+              break;
+            case SDLK_1:
+              control.set_particle_code(1); //beh_falling
+              print("code", 1);
+              break;
+            case SDLK_2:
+              control.set_particle_code(2); //beh_levitating
+              print("code", 2);
+              break;
           };
           break;
 

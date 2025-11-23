@@ -93,25 +93,22 @@ public:
 
   static void update() { // — максимум кадров в секунду.
     // Рисование частиц:
-    if (not control.get_ctrl()) {
-      if ( event_handler->is_left_down ) {
-  
-        if ( Particle::create_new( event_handler->pointer_pos, 1 ) ) {
-          
-          drawler->draw_pixel( event_handler->pointer_pos, { .r = 255 });
-        }
-  
-      } else if ( event_handler->is_right_down ) {
-  
-        if ( Particle::create_new( event_handler->pointer_pos ) ) {
-          
+    if ( event_handler->is_left_down ) {
+
+      if ( Particle::create_new( event_handler->pointer_pos, control.get_particle_code() ) ) {
+        if (control.get_particle_code() == 0) {
           drawler->draw_pixel( event_handler->pointer_pos, { .b = 255 });
+        } else if (control.get_particle_code() == 1) {
+          drawler->draw_pixel( event_handler->pointer_pos, { .r = 255 });
+        } else if (control.get_particle_code() == 2) {
+          drawler->draw_pixel( event_handler->pointer_pos, { .g = 255 });
         }
       }
-    } else {
+    } else if ( event_handler->is_right_down ) {
       // print("clear");
       drawler->clear_pixel(window_config.pos_to_hash(event_handler->pointer_pos));
     }
+
 
     // Обновление частиц:
     Particle::update_all();

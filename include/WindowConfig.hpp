@@ -19,7 +19,7 @@ struct WindowConfig {
 
   bool pos_in_res(int pos_hash) {
     // print(get_res_area());
-    return pos_hash < get_res_area();
+    return pos_hash < get_res_area() && pos_hash >= 0;
   }
 
 
