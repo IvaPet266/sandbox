@@ -166,8 +166,11 @@ public:
 
 //* Пример создания частиц:
 void EventHandler::on_mouse_motion(Position pos) {
-
+  
   pointer_pos = pos;
+  if (control.get_space() && Particle::create_new( pointer_pos, 0 )) {
+    game_loop.drawler->draw_pixel(pos, Color::random());
+  }
 }
 
 void EventHandler::on_mouse_button_down(Uint8 btn_number) {
@@ -212,8 +215,6 @@ int main( int argc, char *argv[] ) {
     auto time_st = steady_clock::now();
     GameLoop game_loop;
     game_loop.run();
-
-    // if (game_loop.event_handler->quit) return exit_code;
       
   } catch (const std::exception& exc) { 
     

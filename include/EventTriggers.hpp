@@ -36,13 +36,13 @@ public:
               Particle::clear();
               print("escape");
               break;
-            case SDLK_SPACE: //32=" "
-              print("пробел");
+            case SDLK_SPACE: //32=" "  
+              if (not control.get_space()) control.set_space(true); //режим рисования
               break;
             case SDLK_q: //113="q"
-            control.set_run(false);
-            // break;
-            return;
+              control.set_run(false);
+              // break;
+              return;
             case SDLK_RCTRL:
             case SDLK_LCTRL:
               //todo при нажатом ctrl [свободная клавиша]
@@ -53,15 +53,15 @@ public:
               break;
             case SDLK_0:
               control.set_particle_code(0); //beh_monolit
-              print("code", 0);
+              print("code", control.get_particle_code());
               break;
             case SDLK_1:
               control.set_particle_code(1); //beh_falling
-              print("code", 1);
+              print("code", control.get_particle_code());
               break;
             case SDLK_2:
               control.set_particle_code(2); //beh_levitating
-              print("code", 2);
+              print("code", control.get_particle_code());
               break;
           };
           break;
@@ -73,7 +73,7 @@ public:
               print("escape отжат");
               break;
             case SDLK_SPACE:
-              print("пробел отжат");
+              control.set_space(false);
               break;
             case SDLK_LCTRL:
             case SDLK_RCTRL:
