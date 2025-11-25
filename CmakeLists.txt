@@ -14,6 +14,8 @@
 
 set(VAR_PROJECT_NAME "Proj" CACHE STRING "Название проекта")
 
+set(VAR_TEST ON CACHE BOOL ON)
+
 set(SDL2_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL2") 
 
 
@@ -55,6 +57,16 @@ add_definitions(-DSDL_STATIC)
 # Исполняемые файлы все в директории src:
 file(GLOB_RECURSE VAR_EXECUTABLE "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 add_executable(${PROJECT_NAME} ${VAR_EXECUTABLE})
+
+if (VAR_TEST)
+  message("TEST")
+  file(GLOB_RECURSE VAR_EXECUTABLE_TEST "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.cpp")
+  add_executable(Test ${VAR_EXECUTABLE_TEST})
+  target_include_directories(Test PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/include"
+    "${SDL2_LIB_PATH}/include"
+)
+endif()
 
 # Поиск библиотеки SDL2main:
 find_library(

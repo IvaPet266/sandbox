@@ -7,7 +7,6 @@ REM Имя проекта:
 set VAR_PROJECT_NAME=ParticlesGame
 set UPD_CMAKE_CONFIG=ON
 
-
 REM Удаляем старую сборку:
 if exist build (
  
@@ -58,5 +57,13 @@ if exist %VAR_PROJECT_NAME%.exe (
   
   REM Запускаем сборку:
   %VAR_PROJECT_NAME%
+)
+
+if exist Test.exe (
+
+  echo Компиляция теста завершилась успешно
+  
+  REM Запускаем сборку:
+  Test.exe
 )
  
