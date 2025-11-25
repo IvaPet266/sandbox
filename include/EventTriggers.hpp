@@ -43,9 +43,9 @@ public:
               control.set_run(false);
               // break;
               return;
-            case SDLK_RCTRL:
+            // case SDLK_RCTRL:
             case SDLK_LCTRL:
-              //todo при нажатом ctrl [свободная клавиша]
+              //todo при нажатии ctrl меняется тип частицы по нажатию
               if (not control.get_ctrl()) control.set_ctrl(true);
               break;
             case SDLK_i:
@@ -75,8 +75,8 @@ public:
             case SDLK_SPACE:
               control.set_space(false);
               break;
+            // case SDLK_RCTRL:
             case SDLK_LCTRL:
-            case SDLK_RCTRL:
               control.set_ctrl(false);
               break;
             

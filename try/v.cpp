@@ -18,15 +18,15 @@ void c(int &e){
 
 int main() {
 
-    bool x = true;
+    std::vector<int> x = {900, 2112, 212111, 6789};
 
-    while (x) {
-        print(101);
-        x = false;
-    }
-    print(8);
+    auto res = std::find(x.begin(), x.end(), 2112);
 
+    std::cout << (res == x.end()) << std::endl;
 
+    int s = 0;
+    s += 5 % 5;
+    std::cout << s << std::endl;
     return 0;
 }
 

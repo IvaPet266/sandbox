@@ -1,5 +1,5 @@
 #include <iostream>
-
+#define PART_TYPES_AMOUNT 3
 
 class Control {
 private:

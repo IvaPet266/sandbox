@@ -37,6 +37,9 @@ protected:
   Uint8 _type         = 0;
 
 public:
+  Uint8 get_type() {
+    return _type;
+  };
 
   // Поведение частиц 1 вида:
 

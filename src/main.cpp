@@ -1,6 +1,7 @@
 
 #include "Position.hpp"
 #include "SDL2/SDL_mouse.h"
+#include "SDL2/SDL_stdinc.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_events.h>
 #include <SDL2/SDL_render.h>
@@ -13,6 +14,7 @@
 #include <Timer.hpp>
 
 // Есть 2 реализации:
+#include <cstddef>
 #include <particles/ParticleStatic.hpp>
 
 #include <iomanip>
@@ -23,6 +25,7 @@
 #include <memory>
 #include <chrono>
 #include <functional>
+#include <utility>
 
 using namespace std::chrono;
 
@@ -90,23 +93,64 @@ public:
     SDL_Quit();
 }
 
+  static void create_type(Position pos = Position{-1, -1}) {
+    Position pix_pos;
+    if (pos.x != -1 && pos.y != -1) {
+      pix_pos = pos;
+    } else {
+      pix_pos = event_handler->pointer_pos;
+    }
+    if ( Particle::create_new( pix_pos, control.get_particle_code() ) ) {
+      if (control.get_particle_code() == 0) {
+        drawler->draw_pixel( pix_pos, { .b = 255 });
+      } else if (control.get_particle_code() == 1) {
+        drawler->draw_pixel( pix_pos, { .r = 255 });
+      } else if (control.get_particle_code() == 2) {
+        drawler->draw_pixel( pix_pos, { .g = 255 });
+      };
+    };
+  };
+
+  static std::pair<Uint32, Uint8> clear_particle(int hash) {
+    Uint8  type      = 0;
+    Uint32 del_count = 0;
+    auto dyn_it = std::find(
+      Particle::_dynPart.begin(), 
+      Particle::_dynPart.end(), 
+      hash
+    );
+    if (dyn_it != Particle::_dynPart.end()) { 
+      Particle::_dynPart.erase(dyn_it);
+    };
+
+    for (auto it = Particle::_all.begin(); it != Particle::_all.end(); ) {
+      if (it->first == hash) {
+        type = it->second.get_type();
+        it = Particle::_all.erase(it);
+        del_count++;
+      } else {
+        ++it;
+      };
+    };
+    return std::pair<Uint32, Uint8> {del_count, type};
+  }
 
   static void update() { // — максимум кадров в секунду.
     // Рисование частиц:
+    int hash = window_config.pos_to_hash(event_handler->pointer_pos);
     if ( event_handler->is_left_down ) {
-
-      if ( Particle::create_new( event_handler->pointer_pos, control.get_particle_code() ) ) {
-        if (control.get_particle_code() == 0) {
-          drawler->draw_pixel( event_handler->pointer_pos, { .b = 255 });
-        } else if (control.get_particle_code() == 1) {
-          drawler->draw_pixel( event_handler->pointer_pos, { .r = 255 });
-        } else if (control.get_particle_code() == 2) {
-          drawler->draw_pixel( event_handler->pointer_pos, { .g = 255 });
-        }
-      }
+      if (control.get_ctrl()) {
+        auto res_clear = clear_particle(hash);
+        if (res_clear.first != 0) {
+          control.set_particle_code((control.get_particle_code() + 1) % PART_TYPES_AMOUNT);
+          // print("particle_code", (control.get_particle_code() + 1) % (PART_TYPES_AMOUNT - 1));
+        };
+      };
+      create_type();
     } else if ( event_handler->is_right_down ) {
       // print("clear");
-      drawler->clear_pixel(window_config.pos_to_hash(event_handler->pointer_pos));
+      auto res = clear_particle(hash);
+      drawler->clear_pixel(hash);
     }
 
 
@@ -168,9 +212,16 @@ public:
 void EventHandler::on_mouse_motion(Position pos) {
   
   pointer_pos = pos;
-  if (control.get_space() && Particle::create_new( pointer_pos, 0 )) {
-    game_loop.drawler->draw_pixel(pos, Color::random());
-  }
+  if (control.get_space()) {
+    int hash = window_config.pos_to_hash(pointer_pos);
+    auto res = GameLoop::clear_particle(hash);
+    if (res.first != 0) {
+      game_loop.drawler->clear_pixel(hash);
+    };
+    if (Particle::create_new( pointer_pos, 0 )) {
+      game_loop.drawler->draw_pixel(pos, Color::random());
+    };
+  };
 }
 
 void EventHandler::on_mouse_button_down(Uint8 btn_number) {
