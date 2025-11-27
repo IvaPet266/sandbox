@@ -1,8 +1,8 @@
-#pragma once
+#include <Position.hpp>
+#include <control.hpp>
 
-// #include "print/terminal.hpp"
-#include "Position.hpp"
-// #include <iostream>
+
+#pragma once
 
 
 struct WindowConfig {

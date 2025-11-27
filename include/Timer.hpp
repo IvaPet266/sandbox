@@ -1,8 +1,12 @@
 #include <chrono>
 #include <functional>
-#include <iostream>
+
+#include "print/terminal.hpp"
+
 
 using namespace std::chrono;
+
+#pragma once
 
 
 class TimeManager {

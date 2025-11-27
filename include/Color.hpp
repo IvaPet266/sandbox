@@ -1,7 +1,10 @@
 #include <SDL2/SDL_render.h>
 #include <cstdlib>
+#include <ctime>
+
 
 #pragma once
+
 
 struct Color {
 
@@ -23,6 +26,7 @@ struct Color {
   }
 
   static Color random() {
+    std::srand(std::time(0));
     return Color{
       .r = static_cast<Uint8>(std::rand() % 255),
       .g = static_cast<Uint8>(std::rand() % 255),

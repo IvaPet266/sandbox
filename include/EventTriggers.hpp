@@ -1,13 +1,7 @@
-#include "SDL2/SDL_keycode.h"
-#include "SDL2/SDL_stdinc.h"
 #include <SDL2/SDL_events.h>
 
-#include <Position.hpp>
-#include <WindowConfig.hpp>
 #include "particles/ParticleStatic.hpp"
-#include <control.hpp>
-#include <windows.h>
-// #include <iostream>
+
 
 #pragma once
 
@@ -43,25 +37,40 @@ public:
               control.set_run(false);
               // break;
               return;
+            case SDLK_f: //скорость частиц
+              control.set_speed((control.get_speed() + 1) % static_cast<Uint8>(SPEEDS_AMOUNT));
+              break;
             // case SDLK_RCTRL:
+            //   if (not control.get_rctrl()) control.set_rctrl(true);
+            //   break;
             case SDLK_LCTRL:
               //todo при нажатии ctrl меняется тип частицы по нажатию
-              if (not control.get_ctrl()) control.set_ctrl(true);
+              if (not control.get_lctrl()) control.set_lctrl(true);
               break;
             case SDLK_i:
               print("particles amount", Particle::_all.size());
               break;
             case SDLK_0:
-              control.set_particle_code(0); //beh_monolit
+              if (control.get_particle_code() != 0) control.set_particle_code(0); //beh_monolit
               print("code", control.get_particle_code());
               break;
             case SDLK_1:
-              control.set_particle_code(1); //beh_falling
+              if (control.get_particle_code() != 1) control.set_particle_code(1); //beh_falling
               print("code", control.get_particle_code());
               break;
             case SDLK_2:
-              control.set_particle_code(2); //beh_levitating
+              if (control.get_particle_code() != 2) control.set_particle_code(2); //beh_levitating
               print("code", control.get_particle_code());
+              break;
+            // case SDLK_3:
+            //   if (control.get_particle_code() != 3) control.set_particle_code(3); //beh_levitating-right
+            //   print("code", control.get_particle_code());
+              break;
+            // case SDLK_r: // рандомное расположение частиц по нажатию
+            //   control.set_r(true);
+            //   break;
+            case SDLK_LSHIFT: //рандомное расположение частиц по нажатию с удалением всех предыдущих
+              if (not control.get_shift()) control.set_shift(true);
               break;
           };
           break;
@@ -76,8 +85,13 @@ public:
               control.set_space(false);
               break;
             // case SDLK_RCTRL:
+            //   control.set_rctrl(false);
+            //   break;
             case SDLK_LCTRL:
-              control.set_ctrl(false);
+              control.set_lctrl(false);
+              break;
+            case SDLK_LSHIFT:
+              control.set_shift(false);
               break;
             
           };

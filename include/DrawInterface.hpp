@@ -1,15 +1,8 @@
-#include "Position.hpp"
-#include "SDL2/SDL_stdinc.h"
-// #include "print/terminal.hpp"
 #include <SDL2/SDL_render.h>
 
 #include <WindowConfig.hpp>
 #include <Color.hpp>
 
-#include <cstdint>
-#include <stdexcept>
-#include <vector>
-// #include <iostream>
 
 #pragma once
 
@@ -135,6 +128,10 @@ public:
     if ( not window_config.pos_in_res(pos_hash) ) return;
 
     pixel_buffer[ pos_hash ] = clear_color;
+  }
+
+  void clear_buffer() {
+    std::fill_n(pixel_buffer.data(), pixel_buffer.size(), clear_color); // замена на дефолтный цвет 
   }
 
   Uint32 get_pixel(Uint32 pos_hash) {

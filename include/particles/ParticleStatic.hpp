@@ -1,16 +1,8 @@
-#include "../include/Position.hpp"
 #include "DrawInterface.hpp"
-#include "SDL2/SDL_stdinc.h"
-#include <WindowConfig.hpp>
-#include "print/terminal.hpp"
 
-#include <iostream>
-#include <exception>
-#include <sys/stat.h>
+// #include <chrono>
 #include <unordered_map>
-#include <array>
-#include <vector>
-#include <algorithm>
+
 
 #define DEBUG 0
 
@@ -36,10 +28,7 @@ protected:
   
   Uint8 _type         = 0;
 
-public:
-  Uint8 get_type() {
-    return _type;
-  };
+protected:
 
   // Поведение частиц 1 вида:
 
@@ -47,10 +36,9 @@ public:
     /* Ничего не происходит. Статичное поведение. */
   }
 
-  // Поведение частиц 2 вида:
+  // Поведение частиц 2, 3 вида:
 
-  static void beh_falling(MapIterator& iterator) {
-    
+  static void beh_falling(MapIterator& iterator) { //todo
     // Замедление обновления частиц:
     if ( iterator->second.freq_upd_count > 0 ) {
       return;
@@ -63,97 +51,39 @@ public:
     Uint32 pos_hash = iterator->first;
     
     Position pos = drawler->window_config.hash_to_pos(pos_hash);
-    
+    int inst_y = 0;
+    int inst_x = 0;
+    if ( iterator->second.get_type() == 1 ) {
+      inst_y = 1;
+      inst_x = 0;
+    } else if ( iterator->second.get_type() == 2 ) {
+      inst_y = -1;
+      inst_x = 0;
+    } 
+    // else if ( iterator->second.get_type() == 3 ) {
+    //   inst_y = 0;
+    //   inst_x = 1;
+    // }
     Position new_pos = {
-      .x = pos.x,
-      .y = pos.y + 1, // — ось y перевёрнута. 
+      .x = pos.x + inst_x * control.get_speed(),
+      .y = pos.y + inst_y * control.get_speed(), // — ось y перевёрнута. 
     };
 
-    // print(_all);
-    // print(_dynPart);
     const Uint32 entry_color = drawler->get_pixel(pos_hash);
 
     if (not drawler->window_config.pos_in_res(drawler->window_config.pos_to_hash(new_pos))) {
-      // print(_all.size());
       
       drawler->clear_pixel(pos_hash);
       _all.extract(iterator); 
 
-      // print(_all.size());
-      // print("=====");
       return;
     } else {
-      // print(8);
       int pos_new_hash = drawler->window_config.pos_to_hash(new_pos);
       
       MapIterator other_iterator = _all.find(pos_new_hash);
       
       // Если новая позиция НЕ занята:
       if ( other_iterator == _all.end() ) {
-        // print(9);
-        drawler->draw_pixel(pos_new_hash, entry_color);
-        drawler->clear_pixel(pos_hash);
-        
-        // Отключаем узел карты от карты
-        // (ячейка памяти становится самостоятельной):
-  
-        auto node = _all.extract(iterator);
-  
-        node.key()           = pos_new_hash;
-        
-        auto result          = _all.insert(std::move(node));
-  
-        // _dynPart.push_back(node);
-        // if (result.inserted) { 
-        //   iterator = result.position; // * — идём к только что добавленной сущности.
-        // }
-      }
-    };
-    
-
-  } // beh_falling.
-
-  static void beh_levitating(MapIterator& iterator) { //todo
-    // Замедление обновления частиц:
-    if ( iterator->second.freq_upd_count > 0 ) {
-      return;
-    }
-    
-    iterator->second.freq_upd_count = FREQ_UPD_LIMIT;
-    //* Падение частиц:
-    
-    // Нахождение позиции:
-    Uint32 pos_hash = iterator->first;
-    
-    Position pos = drawler->window_config.hash_to_pos(pos_hash);
-    
-    Position new_pos = {
-      .x = pos.x,
-      .y = pos.y - 1, // — ось y перевёрнута. 
-    };
-
-    // print(_all);
-    // print(_dynPart);
-    const Uint32 entry_color = drawler->get_pixel(pos_hash);
-
-    if (not drawler->window_config.pos_in_res(drawler->window_config.pos_to_hash(new_pos))) {
-      // print(_all.size());
-      
-      drawler->clear_pixel(pos_hash);
-      _all.extract(iterator); 
-
-      // print(_all.size());
-      // print("=====");
-      return;
-    } else {
-      // print(8);
-      int pos_new_hash = drawler->window_config.pos_to_hash(new_pos);
-      
-      MapIterator other_iterator = _all.find(pos_new_hash);
-      
-      // Если новая позиция НЕ занята:
-      if ( other_iterator == _all.end() ) {
-        // print(9);
         drawler->draw_pixel(pos_new_hash, entry_color);
         drawler->clear_pixel(pos_hash);
         
@@ -175,6 +105,7 @@ public:
     
   }
 
+public:
 
   // Свойства частицы:
   Behaviour behaviour      = beh_monolit;    //! — поведение.
@@ -191,8 +122,6 @@ public:
   
   const inline static Uint8  FREQ_UPD_LIMIT = 1; // — кол-во пропускаемых между обновлениями кадров.
         inline static Uint32 id_counter     = 0; // — счётчик id.
-
-public:
 
 
 //region Конструкторы копирования:
@@ -213,6 +142,9 @@ public:
   }
 //endregion 
 
+  Uint8 get_type() {
+    return _type;
+  };
 
   static void frame_step() {
 
@@ -222,9 +154,9 @@ public:
 
         it->second.freq_upd_count --;
         
-      }
-    }
-  }
+      };
+    };
+  };
 
   static bool create_new(
     Position pos, 
@@ -252,12 +184,9 @@ public:
       switch (type) {
 
         case 1:
-          it->second.behaviour = beh_falling;
-          _dynPart.emplace_back(pos_hash); //<-
-          // print(90);
-          return inserted;
         case 2:
-          it->second.behaviour = beh_levitating;
+        // case 3:
+          it->second.behaviour = beh_falling;
           _dynPart.emplace_back(pos_hash); //<-
           return inserted;
         default: //0
@@ -268,7 +197,7 @@ public:
     };
 
     return is_positive;
-  }
+  };
 
 
   static void update_all() {
@@ -294,20 +223,24 @@ public:
 
     _dynPart.erase(it, _dynPart.end());
 
-  }
+  };
   
   static void clear() {
     //TODO 
-    for (auto it = _all.begin(); it != _all.end(); ++it) {
-      drawler->clear_pixel(it->first);
-      // it->second.behaviour = beh_falling;
-    };
-    print("clear");
+    Uint16 s = _all.size();
+    auto st_time = std::chrono::high_resolution_clock().now();
     _dynPart.clear();
     _all.clear();
-  }
+    drawler->clear_buffer();
 
-  static bool is_inited() { return drawler != nullptr; }
+    print("clear");
+    auto end_time = std::chrono::high_resolution_clock().now();
+    auto dur = end_time- st_time; //std::chrono::duration_cast<std::chrono::microseconds>(end_time - st_time);
+    print("clear time", dur);
+    print("particles cleared", s);
+  };
+
+  static bool is_inited() { return drawler != nullptr; };
 
 
   static void init(WindowConfig * wind_config, DrawInterface * drawler) {
