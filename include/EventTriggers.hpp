@@ -38,7 +38,7 @@ public:
               // break;
               return;
             case SDLK_f: //скорость частиц
-              control.set_speed((control.get_speed() + 1) % static_cast<Uint8>(SPEEDS_AMOUNT));
+              control.set_speed(static_cast<int>(control.get_speed() + 1) % SPEEDS_AMOUNT );
               break;
             // case SDLK_RCTRL:
             //   if (not control.get_rctrl()) control.set_rctrl(true);

@@ -1,5 +1,6 @@
 // #include <SDL2/SDL_render.h>
 
+#include "Position.hpp"
 #include <WindowConfig.hpp>
 #include <Color.hpp>
 

@@ -1,6 +1,8 @@
 #include "DrawInterface.hpp"
+#include "Position.hpp"
 #include "SDL2/SDL_stdinc.h"
 #include "WindowConfig.hpp"
+#include "control.hpp"
 
 // #include <chrono>
 #include <unordered_map>
@@ -28,8 +30,16 @@ protected:
   // 2. typedef:
   typedef void (* Behaviour )(MapIterator&);                // — тип поведения частиц.
   
-  int _type = 0;
+  int  _type     = 0;
 
+private:
+  static int check_floor(Position pos, MapIterator& it) {
+    Position check_pos = {pos.x, pos.y + it->second.inst_y};
+    auto check_it = _all.find(drawler->window_config.pos_to_hash(check_pos));
+    if (check_it == _all.end()) {
+      return control.get_speed();
+    } else return 0;
+  }
 protected:
 
   // Поведение частиц 1 вида:
@@ -53,9 +63,11 @@ protected:
     Uint32 pos_hash = iterator->first;
     
     Position pos = drawler->window_config.hash_to_pos(pos_hash);
+    int speed = check_floor(pos, iterator);
+    
     Position new_pos = {
       .x = pos.x + iterator->second.inst_x * control.get_speed(),
-      .y = pos.y + iterator->second.inst_y * control.get_speed(), // — ось y перевёрнута. 
+      .y = pos.y + iterator->second.inst_y * speed, // — ось y перевёрнута. 
     };
 
     const Uint32 entry_color = drawler->get_pixel(pos_hash);

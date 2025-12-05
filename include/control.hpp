@@ -11,17 +11,18 @@
 
 class Control {
 private:
-    bool  run           = true;
-    bool  lctrl_pressed = false;
-    bool  rctrl_pressed = false;
-    bool  space_pressed = false;
-    bool  shift_pressed = false;
-    bool  lmb_pressed   = false;
-    bool  rmb_pressed   = false;
-    bool  r_pressed     = false;
-    int   particle_code = 0;
-    int   speed         = 1;
+    bool  run              = true;
+    bool  lctrl_pressed    = false;
+    bool  rctrl_pressed    = false;
+    bool  space_pressed    = false;
+    bool  shift_pressed    = false;
+    bool  lmb_pressed      = false;
+    bool  rmb_pressed      = false;
+    bool  r_pressed        = false;
+    int   particle_code    = 0;
+    int   speed            = 1;
 public:
+    
     void set_run(bool new_flag) {
         run = new_flag;
         std::cout << "run -> " << run << std::endl;
