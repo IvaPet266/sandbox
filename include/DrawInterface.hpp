@@ -1,4 +1,4 @@
-#include <SDL2/SDL_render.h>
+// #include <SDL2/SDL_render.h>
 
 #include <WindowConfig.hpp>
 #include <Color.hpp>

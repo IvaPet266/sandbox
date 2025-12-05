@@ -1,4 +1,6 @@
 #include "DrawInterface.hpp"
+#include "SDL2/SDL_stdinc.h"
+#include "WindowConfig.hpp"
 
 // #include <chrono>
 #include <unordered_map>
@@ -26,7 +28,7 @@ protected:
   // 2. typedef:
   typedef void (* Behaviour )(MapIterator&);                // — тип поведения частиц.
   
-  Uint8 _type         = 0;
+  int _type = 0;
 
 protected:
 
@@ -39,7 +41,7 @@ protected:
   // Поведение частиц 2, 3 вида:
 
   static void beh_falling(MapIterator& iterator) { //todo
-    // Замедление обновления частиц:
+    // // Замедление обновления частиц:
     if ( iterator->second.freq_upd_count > 0 ) {
       return;
     }
@@ -51,28 +53,14 @@ protected:
     Uint32 pos_hash = iterator->first;
     
     Position pos = drawler->window_config.hash_to_pos(pos_hash);
-    int inst_y = 0;
-    int inst_x = 0;
-    if ( iterator->second.get_type() == 1 ) {
-      inst_y = 1;
-      inst_x = 0;
-    } else if ( iterator->second.get_type() == 2 ) {
-      inst_y = -1;
-      inst_x = 0;
-    } 
-    // else if ( iterator->second.get_type() == 3 ) {
-    //   inst_y = 0;
-    //   inst_x = 1;
-    // }
     Position new_pos = {
-      .x = pos.x + inst_x * control.get_speed(),
-      .y = pos.y + inst_y * control.get_speed(), // — ось y перевёрнута. 
+      .x = pos.x + iterator->second.inst_x * control.get_speed(),
+      .y = pos.y + iterator->second.inst_y * control.get_speed(), // — ось y перевёрнута. 
     };
 
     const Uint32 entry_color = drawler->get_pixel(pos_hash);
 
     if (not drawler->window_config.pos_in_res(drawler->window_config.pos_to_hash(new_pos))) {
-      
       drawler->clear_pixel(pos_hash);
       _all.extract(iterator); 
 
@@ -111,6 +99,8 @@ public:
   Behaviour behaviour      = beh_monolit;    //! — поведение.
   Uint8     freq_upd_count = FREQ_UPD_LIMIT; //  — счётчик обновления.
   Uint32    id             = 0;              //  — id для сравнения частиц.
+  int inst_y               = 1;
+  int inst_x               = 0;
 
 
   // Статические поля:
@@ -142,10 +132,13 @@ public:
   }
 //endregion 
 
-  Uint8 get_type() {
+  int get_type() {
     return _type;
   };
-
+  
+  void set_type(int new_type) {
+    _type = new_type;
+  };
   static void frame_step() {
 
     for ( MapIterator it = _all.begin(); it != _all.end(); ++it ) {
@@ -170,12 +163,12 @@ public:
     int  pos_hash    = drawler->window_config.pos_to_hash(pos);
     bool is_positive = pos_hash > -1;
 
-    if ( is_positive ) {//&& _all.find(pos_hash) == _all.end()) {
+    if ( is_positive && _all.find(pos_hash) == _all.end()) {
 
       auto [ it, inserted ] = _all.try_emplace(pos_hash);
 
       // Назначение типа
-      it->second._type = type; //<-
+      it->second.set_type(type); //<-
       
       // Назначение id:
       it->second.id = id_counter++;
@@ -184,16 +177,22 @@ public:
       switch (type) {
 
         case 1:
-        case 2:
-        // case 3:
+          it->second.inst_y = 1;
           it->second.behaviour = beh_falling;
           _dynPart.emplace_back(pos_hash); //<-
-          return inserted;
+          break;
+        case 2:
+          // case 3:
+          it->second.inst_y = -1;
+          it->second.behaviour = beh_falling;
+          _dynPart.emplace_back(pos_hash); //<-
+          break;
         default: //0
           it->second.behaviour = beh_monolit;
-          return inserted;
           // TODO
-      };
+          break;
+        };
+      return inserted;
     };
 
     return is_positive;

@@ -122,7 +122,7 @@ public:
     int hash = window_config.pos_to_hash(event_handler->pointer_pos);
     // if ( event_handler->is_left_down ) {
     if ( control.get_lmb() ) {
-      if (control.get_lctrl()) {
+      if ( control.get_lctrl() ) {
         auto res_clear = clear_particle(hash);
         if (res_clear.first != 0) {
           control.set_particle_code((control.get_particle_code() + 1) % PART_TYPES_AMOUNT);
@@ -166,7 +166,6 @@ public:
       };
     };
 
-
     // Обновление частиц:
     Particle::update_all();
   }
@@ -178,7 +177,7 @@ public:
   }
 
   static void render() {
-    // GameLoop::fixed_update();
+    GameLoop::fixed_update();
 
     GameLoop::drawler->render();
   }

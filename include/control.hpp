@@ -20,7 +20,7 @@ private:
     bool  rmb_pressed   = false;
     bool  r_pressed     = false;
     int   particle_code = 0;
-    Uint8 speed         = 1;
+    int   speed         = 1;
 public:
     void set_run(bool new_flag) {
         run = new_flag;
@@ -38,11 +38,11 @@ public:
         return particle_code;
     }
 
-    void set_speed(Uint8 new_speed) {
+    void set_speed(int new_speed) {
         speed = new_speed;
         std::cout<< "speed -> " << speed << std::endl;
     }
-    Uint8 get_speed() const {
+    int get_speed() {
         return speed;
     }
 
@@ -102,9 +102,6 @@ public:
 
         return r_pressed;
     }
-
-    
-    
 };
 
 Control control = Control();
