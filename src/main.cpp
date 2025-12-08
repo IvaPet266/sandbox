@@ -2,6 +2,7 @@
 
 #include <EventTriggers.hpp>
 // #include "../text/text.cpp"
+#include "particles/ParticleStatic.hpp"
 
 // Есть 2 реализации:
 #include <cstddef>
@@ -34,7 +35,8 @@ public:
 
 class GameLoop { 
 private:
-  bool start = true;
+  static inline bool start_off = false;
+  static inline bool start     = true;
 public:
 
   static inline WindowConfig  window_config {
@@ -71,6 +73,22 @@ public:
     
     SDL_Quit();
 }
+  
+  void set_start(bool flag) {
+    start = flag;
+  }
+
+  bool get_start() {
+    return start;
+  }
+
+  void set_start_off(bool flag) {
+    start_off = flag;
+  }
+
+  bool get_start_off() {
+    return start_off;
+  }
 
   static void create_type(Position pos = Position{-1, -1}) {
     Position pix_pos;
@@ -120,7 +138,15 @@ public:
   static void update() { // — максимум кадров в секунду.
     // Рисование частиц:
     int hash = window_config.pos_to_hash(event_handler->pointer_pos);
-    // if ( event_handler->is_left_down ) {
+
+    // if ( start_off == true && start == true ) {
+    //   for (auto it = Particle::_all.begin(); it != Particle::_all.end(); ++it) {
+    //     it->second.set_type(1);
+    //     it->second.upd_beh();
+    //     Particle::_dynPart.emplace_back(it->first);
+    //     it->second.behaviour(it);
+    //   }
+    // } else 
     if ( control.get_lmb() ) {
       if ( control.get_lctrl() ) {
         auto res_clear = clear_particle(hash);
@@ -130,12 +156,10 @@ public:
         };
       };
       create_type();
-    // } else if ( event_handler->is_right_down ) {
     } else if ( control.get_rmb() ) {
       // print("clear");
       auto res = clear_particle(hash);
       drawler->clear_pixel(hash);
-    // } else if ( event_handler->is_r_down ) {
     } else if ( control.get_r() ) {
       if ( control.get_shift() ) {
         Particle::clear();
@@ -188,6 +212,21 @@ public:
     TimeManager upd  = TimeManager(0ns,  [] () { update(); });
     TimeManager ren  = TimeManager(16ms, [] () { render(); });
     
+    // //todo информационный текст пикселями
+    // GameLoop::start_off = false;
+    // auto text = Text::get_text();
+    // for (int i_ = 0; i_ < 3; i_++) {
+    //   for (auto i = text[0].begin(); i != text[0].end(); ++i) {
+    //     Position pos {
+    //       .x=30 + i[i_][0][0],
+    //       .y=70 + i[i_][1][0]
+    //     };
+    //     if (Particle::create_new(pos, 1)) {
+    //       drawler->draw_pixel( pos, { .r = i[i_][2][0], .g = i[i_][2][1], .b = i[i_][2][2] });
+    //     }
+    //   }
+    // }
+
     while (control.get_run()) {
       ev_h.tick();
       upd. tick();
@@ -196,18 +235,6 @@ public:
     
     // timer.start_ticking();
     
-    // if (start) { //todo информационный текст пикселями
-    //   Text t;
-    //   auto text = t.get_text();
-    //   for (auto i = text[0].begin(); i != text[0].end(); ++i) {
-    //     Position pos {
-    //       .x=30 + i[0][0],
-    //       .y=70 + i[1][0]
-    //     };
-    //     Particle::create_new(pos, 1);
-    //     drawler->draw_pixel( pos, { .r = i[2][0], .g = i[2][1], .b = i[2][2] });
-    //   }
-    // }
     return;
   }
 };
@@ -215,7 +242,6 @@ public:
 
 //* Пример рисования:
 // void EventHandler::on_mouse_motion(Position pos) {
-
 //   game_loop.drawler->draw_pixel(pos, Color::random());
 // }
 
@@ -239,7 +265,8 @@ void EventHandler::on_mouse_motion(Position pos) {
 }
 
 void EventHandler::on_mouse_button_down(Uint8 btn_number) {
-  
+  // if (game_loop.get_start_off() == false && game_loop.get_start() == true) game_loop.set_start_off(true);
+
   switch (btn_number) {
 
     case SDL_BUTTON_LEFT:

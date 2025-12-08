@@ -1,18 +1,16 @@
-#include <array>
 #include <cstdlib>
 #include "..\text\nums.cpp"
-#include "SDL2/SDL_stdinc.h"
 #include <algorithm>
 
 
 class Text {
 protected:
-    static const int size = 500;
-    static constexpr std::array<Uint8, 3> lightgrey  = {217, 217, 217};
-    static constexpr std::array<Uint8, 3> lightgreen = {0,   255, 0  };
+    inline static const int size = 500;
+    inline static constexpr std::array<Uint8, 3> lightgrey  = {217, 217, 217};
+    inline static constexpr std::array<Uint8, 3> lightgreen = {0,   255, 0  };
 
 private:
-    std::array<std::array<std::array<Uint8, 3>, 3>, size> press(
+    inline static std::array<std::array<std::array<Uint8, 3>, 3>, size> press(
         std::array<Uint8, 3> l1,
         std::array<Uint8, 3> l2,
         std::array<Uint8, 3> l3,
@@ -57,7 +55,7 @@ private:
         return press;       
     }
 
-    std::array<std::array<std::array<Uint8, 3>, 3>, size> to(
+    inline static std::array<std::array<std::array<Uint8, 3>, 3>, size> to(
         std::array<Uint8, 3> l1,
         std::array<Uint8, 3> l2,
         std::array<Uint8, 3> l3,
@@ -81,7 +79,7 @@ private:
         return to;
     }
 
-    std::array<std::array<std::array<Uint8, 3>, 3>, size> clear_the_field(
+    inline static std::array<std::array<std::array<Uint8, 3>, 3>, size> clear_the_field(
         std::array<Uint8, 3> l1,
         std::array<Uint8, 3> l2,
         std::array<Uint8, 3> l3,
@@ -174,7 +172,7 @@ private:
     }
 
 protected:
-    std::array<std::array<std::array<Uint8, 3>, 3>, size> words(int type=1, int line=1) {
+    inline static std::array<std::array<std::array<Uint8, 3>, 3>, size> words(int type=1, int line=1) {
         std::array<Uint8, 3> l1;
         std::array<Uint8, 3> l2;
         std::array<Uint8, 3> l3;
@@ -215,7 +213,7 @@ protected:
         }
     }
 
-    std::array<std::array<std::array<Uint8, 3>, 3>, size> get_1st_line() {
+    inline static std::array<std::array<std::array<Uint8, 3>, 3>, size> get_1st_line() {
         std::array<std::array<std::array<Uint8, 3>, 3>, size> press = words(1, 1);
         std::array<std::array<std::array<Uint8, 3>, 3>, size> to    = words(2, 1);
 
@@ -262,7 +260,7 @@ protected:
         return first_line;
     }
 
-    std::array<std::array<std::array<Uint8, 3>, 3>, size> get_2st_line() {
+    inline static std::array<std::array<std::array<Uint8, 3>, 3>, size> get_2st_line() {
         std::array<std::array<std::array<Uint8, 3>, 3>, size> press = words(1, 1);
         std::array<std::array<std::array<Uint8, 3>, 3>, size> to    = words(2, 1);
 
@@ -305,21 +303,24 @@ protected:
         return second_line;        
     }
 
-    std::array<std::array<std::array<Uint8, 3>, 3>, size> get_3st_line() {
+    inline static std::array<std::array<std::array<Uint8, 3>, 3>, size> get_3st_line() {
 
     }
 
-    std::array<std::array<std::array<Uint8, 3>, 3>, size> get_4st_line() {
+    inline static std::array<std::array<std::array<Uint8, 3>, 3>, size> get_4st_line() {
 
     }
 
 public:
-    std::array<std::array<std::array<Uint8, 3>, 3>, size> get_text() {
-        std::array<std::array<std::array<Uint8, 3>, 3>, size> first_line  = get_1st_line();
-        std::array<std::array<std::array<Uint8, 3>, 3>, size> second_line = get_2st_line();
-        std::array<std::array<std::array<Uint8, 3>, 3>, size> third_line  = get_3st_line();
-        std::array<std::array<std::array<Uint8, 3>, 3>, size> fourth_line = get_4st_line();
-        
+    inline static std::array<std::array<std::array<std::array<Uint8, 3>, 3>, size>, 4> get_text() {
+        std::array<std::array<std::array<std::array<Uint8, 3>, 3>, size>, 4> t = {
+            get_1st_line(),
+            get_2st_line(),
+            get_3st_line(),
+            // get_4st_line(),
+        };
+
+        return t;
     }
 };
 

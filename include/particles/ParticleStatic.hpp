@@ -24,7 +24,7 @@ protected:
   // Объявление сокращённых типов (2 способа):
   // 1. using:
   using ParticleMap    = std::unordered_map<int, Particle>; // — тип карты частиц.
-  using MapIterator    = ParticleMap::iterator;                // — тип итератора по карте.
+  using MapIterator    = ParticleMap::iterator;             // — тип итератора по карте.
   using ParticleVector = std::vector<int>;
   // typedef ParticleMap::iterator MapIterator;
   // 2. typedef:
@@ -162,6 +162,24 @@ public:
       };
     };
   };
+
+  void upd_beh() {
+    switch (_type) {
+      case 1:
+        inst_y    = 1;
+        behaviour = beh_falling;
+        break;
+      case 2:
+        // case 3:
+        inst_y    = -1;
+        behaviour = beh_falling;
+        break;
+      default: //0
+        behaviour = beh_monolit;
+        // TODO
+        break;
+    }
+  }
 
   static bool create_new(
     Position pos, 
