@@ -14,10 +14,11 @@
 
 set(VAR_PROJECT_NAME "Proj" CACHE STRING "Название проекта")
 
-set(VAR_TEST OFF CACHE BOOL OFF)
+set(VAR_TEST ON CACHE BOOL ON)
 
 set(SDL2_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL2") 
 
+set(TEST "Test")
 
 # Версия cmake:
 cmake_minimum_required(VERSION 3.12)
@@ -53,7 +54,7 @@ add_definitions(-DSDL_STATIC)
 
 # Исполняемый файл main.cpp:
 # add_executable(${PROJECT_NAME} "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
-
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/executable/")
 # Исполняемые файлы все в директории src:
 file(GLOB_RECURSE VAR_EXECUTABLE "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 add_executable(${PROJECT_NAME} ${VAR_EXECUTABLE})
@@ -61,8 +62,8 @@ add_executable(${PROJECT_NAME} ${VAR_EXECUTABLE})
 if (VAR_TEST)
   message("TEST")
   file(GLOB_RECURSE VAR_EXECUTABLE_TEST "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.cpp")
-  add_executable(Test ${VAR_EXECUTABLE_TEST})
-  target_include_directories(Test PRIVATE
+  add_executable(${TEST} ${VAR_EXECUTABLE_TEST})
+  target_include_directories(${TEST} PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/include"
     "${SDL2_LIB_PATH}/include"
 )
@@ -123,7 +124,18 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 # Пути include:
 # include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 # include_directories(${SDL2_LIB_PATH}/include)
+message(${TEST})
 target_include_directories(${PROJECT_NAME} PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/include"
     "${SDL2_LIB_PATH}/include"
+)
+
+add_custom_target(build_main
+  DEPENDS ${PROJECT_NAME}
+  COMMENT "main build"
+)
+
+add_custom_target(build_test
+  DEPENDS ${TEST}
+  COMMENT "test build"
 )

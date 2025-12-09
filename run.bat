@@ -45,7 +45,7 @@ mingw32-make
 
 REM Проверяем успешное завершение сборки:
 if not exist %VAR_PROJECT_NAME%.exe (
-    echo Компиляция завершилась ошибкой
+  echo Компиляция завершилась ошибкой
 )
 
 REM В bat файлах нет `else`,
