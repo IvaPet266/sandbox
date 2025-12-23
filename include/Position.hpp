@@ -15,7 +15,7 @@ struct Position {
     return "x -> " + std::to_string(x) + " y -> " + std::to_string(y);
   }
 
-  static Position interpolate(Position p1, Position p2) {
+  static Position interpolate(Position& p1, Position& p2) {
     if (p1.x == p2.x && p1.y == p2.y) return p1;
     
     int dx = std::abs(p2.x - p1.x);

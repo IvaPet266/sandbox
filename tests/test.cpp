@@ -9,42 +9,45 @@
 #define TEST_COUNT 5
 #define PARAM_COUNT 4
 
-int func(int a, int b) {
-    return a / b;
+struct PosData {
+    Position start_pos;
+    Position target_pos;
+    std::string name = "first";
+
+    void error_output(Position& current_pos) {
+        std::cerr << "test " << name << " failed\n";
+        std::cerr << "problem occured in position :: " << current_pos.to_string() << "\n";
+    }
 };
 
 int main() {
-    std::array<std::array<int, PARAM_COUNT>, TEST_COUNT> tests = {{
-        {4,  2, 2, 5},
-        {8,  4, 2, 5},
-        {6,  2, 1, 5},
-        {10, 2, 2, 5},
-        {40, 5, 7, 5}
-    }};
+    std::vector<PosData> tests = {
+        PosData{4,  2, 2, 5, "first" },
+        PosData{8,  4, 2, 5, "second"},
+        PosData{6,  2, 1, 5, "third" },
+        PosData{10, 2, 2, 5, "fourth"},
+        PosData{30, 5, 7, 5, "fifth" },
+        PosData{40, 5, 40, 5, "sixth" },
+    };
     bool all_ok = true;
 
     std::cout << "Running tests...\n";
-    for (auto it = tests.begin(); it != tests.end(); it++) {
-        Position res = Position::interpolate(Position{(*it)[0], (*it)[1]}, Position{(*it)[2], (*it)[3]});
-        std::vector<Position> res_list = {Position{(*it)[0], (*it)[1]}};
-
-        while (res.x != (*it)[2] && res.y != (*it)[3]) {
-            int dx = std::abs(res.x - res_list[res_list.size()-1].x);
-            int dy = std::abs(res.y - res_list[res_list.size()-1].y);
-
-            if (dx > 1 || dy > 1) {
-                std::cout << "out of range 1" << std::endl;
-                all_ok = false;
+    for (auto& case_ : tests) {
+        std::cout << "running " << case_.name << " test\n";
+        Position cur_pos = case_.start_pos;
+        do {
+            Position new_pos = Position::interpolate(cur_pos, case_.target_pos);
+            if (
+                std::abs(cur_pos.x - new_pos.x) > 1 ||
+                std::abs(cur_pos.y - new_pos.y) > 1
+            ) {
+                case_.error_output(cur_pos);
                 break;
-            }
-
-            res = Position::interpolate(Position{res.x, res.y}, Position{(*it)[2], (*it)[3]});
-            res_list.push_back(res);
-        };
-        for (auto it = res_list.begin(); it < res_list.end(); it++) {
-            std::cout << it->to_string() << std::endl;
-        }
-    }
+            };
+            cur_pos = new_pos;
+            std::cout << cur_pos.to_string() << std::endl;
+        } while (cur_pos.x != case_.target_pos.x && cur_pos.y != case_.target_pos.y);
+    };
 
     std::cout << "=========" << std::endl;    
     
