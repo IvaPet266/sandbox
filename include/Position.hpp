@@ -28,9 +28,6 @@ struct Position {
     int x = p1.x;
     int y = p1.y;
     
-    // Флаг, чтобы пропустить начальную точку
-    bool firstStep = true;
-    
     while (true) {
         int e2 = 2 * err;
         if (e2 > -dy) {

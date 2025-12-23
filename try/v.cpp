@@ -19,8 +19,6 @@ std::vector<Point> getIntermediatePoints(Point start, Point end) {
     int x = start.x;
     int y = start.y;
     
-    // Флаг, чтобы пропустить начальную точку
-    bool firstStep = true;
     
     while (true) {
         int e2 = 2 * err;
