@@ -24,39 +24,29 @@ int main() {
     bool all_ok = true;
 
     std::cout << "Running tests...\n";
-    std::vector<Position> res;
-    for (size_t i = 0; i < tests.size(); i++) {
-        std::cout << "test" << i+1 << std::endl;
-        res = Position::interpolate(Position(tests[i][0], tests[i][1]), Position(tests[i][2], tests[i][3]));
-        for (size_t e = 0; e < res.size(); e++) { // проверка на границы
-            if (tests[i][0] - tests[i][2] > 0) {
-                if (res[e].x > tests[i][0] || res[e].x < tests[i][2]) {
-                    std::cerr << "out of range 1: " << res[e].x << std::endl;
-                    all_ok = false;
-                }
-            } else {
-                if (res[e].x < tests[i][0] || res[e].x > tests[i][2]) {
-                    std::cerr << "out of range 2: " << res[e].x << std::endl;
-                    all_ok = false;
-                }
+    for (auto it = tests.begin(); it != tests.end(); it++) {
+        Position res = Position::interpolate(Position{(*it)[0], (*it)[1]}, Position{(*it)[2], (*it)[3]});
+        std::vector<Position> res_list = {Position{(*it)[0], (*it)[1]}};
+
+        while (res.x != (*it)[2] && res.y != (*it)[3]) {
+            int dx = std::abs(res.x - res_list[res_list.size()-1].x);
+            int dy = std::abs(res.y - res_list[res_list.size()-1].y);
+
+            if (dx > 1 || dy > 1) {
+                std::cout << "out of range 1" << std::endl;
+                all_ok = false;
+                break;
             }
-            if (tests[i][1] - tests[i][3] > 0) {
-                if (res[e].x > tests[i][1] || res[e].x < tests[i][3]) {
-                    std::cerr << "out of range 3: " << res[e].x << std::endl;
-                    all_ok = false;
-                }
-            } else {
-                if (res[e].x < tests[i][1] || res[e].x > tests[i][3]) {
-                    std::cerr << "out of range 4: " << res[e].x << std::endl;
-                    all_ok = false;
-                }
-            }
-                int dx = std::abs(tests[i][0] - res[e].x);
-                int dy = std::abs(tests[i][1] - res[e].y);
-                all_ok = dx <= 1 && dy <= 1;
-            }
+
+            res = Position::interpolate(Position{res.x, res.y}, Position{(*it)[2], (*it)[3]});
+            res_list.push_back(res);
+        };
+        for (auto it = res_list.begin(); it < res_list.end(); it++) {
+            std::cout << it->to_string() << std::endl;
         }
-        std::cout << "=========" << std::endl;    
+    }
+
+    std::cout << "=========" << std::endl;    
     
     std::cout << (all_ok ? "All tests passed\n" : "Some tests failed\n");
     return EXIT_SUCCESS;

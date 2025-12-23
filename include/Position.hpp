@@ -15,8 +15,8 @@ struct Position {
     return "x -> " + std::to_string(x) + " y -> " + std::to_string(y);
   }
 
-  static std::vector<Position> interpolate(Position p1, Position p2) {
-    std::vector<Position> points;
+  static Position interpolate(Position p1, Position p2) {
+    if (p1.x == p2.x && p1.y == p2.y) return p1;
     
     int dx = std::abs(p2.x - p1.x);
     int dy = std::abs(p2.y - p1.y);
@@ -27,24 +27,16 @@ struct Position {
     int err = dx - dy;
     int x = p1.x;
     int y = p1.y;
-    
-    while (true) {
-        int e2 = 2 * err;
-        if (e2 > -dy) {
-            err -= dy;
-            x += sx;
-        }
-        if (e2 < dx) {
-            err += dx;
-            y += sy;
-        }
-        // Проверяем, не достигли ли конечной точки
-        if (x == p2.x && y == p2.y) {
-            break;
-        }
-        points.push_back({x, y});
-    }
-    
-    return points;
-  }
+  
+      int e2 = 2 * err;
+      if (e2 > -dy) {
+          err -= dy;
+          x += sx;
+      }
+      if (e2 < dx) {
+          err += dx;
+          y += sy;
+      }
+      return Position{x, y};
+}
 };
