@@ -2,11 +2,13 @@
 
 #include <EventTriggers.hpp>
 // #include "../text/text.cpp"
+#include "Position.hpp"
 #include "particles/ParticleStatic.hpp"
 
 // Есть 2 реализации:
 #include <cstddef>
 #include <cstdio>
+#include <iostream>
 
 
 using namespace std::chrono;
@@ -37,6 +39,7 @@ class GameLoop {
 private:
   static inline bool start_off = false;
   static inline bool start     = true;
+  static inline Position cursor_cur_pos;
 public:
 
   static inline WindowConfig  window_config {
@@ -64,7 +67,7 @@ public:
     drawler       = std::make_unique<DrawInterface>(window_config);     // — "умный" указатель.
     
     Particle::init(&window_config, drawler.get());
-  }
+  };
 
   ~GameLoop() { 
 
@@ -72,23 +75,31 @@ public:
     // if (drawler)         delete drawler;      //! — эта команда НЕ нужна, так как используется "умный" указатель.
     
     SDL_Quit();
-}
+  };
   
   void set_start(bool flag) {
     start = flag;
-  }
+  };
 
   bool get_start() {
     return start;
-  }
+  };
 
   void set_start_off(bool flag) {
     start_off = flag;
-  }
+  };
 
   bool get_start_off() {
     return start_off;
-  }
+  };
+
+  void set_cursor_pos(Position& new_pos) {
+    cursor_cur_pos = new_pos;
+  };
+
+  Position& get_cursor_pos() {
+    return cursor_cur_pos;
+  };
 
   static void create_type(Position pos = Position{-1, -1}) {
     Position pix_pos;
@@ -109,6 +120,37 @@ public:
       //   drawler->draw_pixel( pix_pos, { .r = 255, .g = 255 });
       // }
     };
+  };
+  
+  static void interpolateController(Position& target_pos, int mode=0) {
+   
+    Position cur_pos = cursor_cur_pos;
+    do {
+      Position new_pos = Position::interpolate(cur_pos, target_pos);
+      if (
+          std::abs(cur_pos.x - new_pos.x) > 1 ||
+          std::abs(cur_pos.y - new_pos.y) > 1
+      ) {
+          std::cerr << "out of range :: line 134\n"; 
+          break;
+      };
+      cur_pos = new_pos;
+
+      if ( mode == 0 ) {
+        if (Particle::create_new( cur_pos, 0 )) {
+          auto c = Color::random();
+          std::cout << static_cast<int>(c.r) << " | " << static_cast<int>(c.g) << " | " << static_cast<int>(c.b) << std::endl;
+          GameLoop::drawler->draw_pixel(target_pos, c);
+        };
+      } else if ( mode == 1 ) {
+        create_type(cur_pos);
+      } else if ( mode == 2 ) {
+        auto hash = window_config.pos_to_hash(cur_pos);
+        auto res = clear_particle(hash);
+        drawler->clear_pixel(hash);
+      }
+    } while (cur_pos.x != target_pos.x && cur_pos.y != target_pos.y);
+    cursor_cur_pos = target_pos;
   };
 
   static std::pair<Uint32, Uint8> clear_particle(int hash) {
@@ -155,11 +197,14 @@ public:
           // print("particle_code", (control.get_particle_code() + 1) % (PART_TYPES_AMOUNT - 1));
         };
       };
-      create_type();
+      // create_type();
+      GameLoop::interpolateController(event_handler->pointer_pos, 1);
     } else if ( control.get_rmb() ) {
       // print("clear");
-      auto res = clear_particle(hash);
-      drawler->clear_pixel(hash);
+      
+      // auto res = clear_particle(hash);
+      // drawler->clear_pixel(hash);
+      GameLoop::interpolateController(event_handler->pointer_pos, 2);
     } else if ( control.get_r() ) {
       if ( control.get_shift() ) {
         Particle::clear();
@@ -201,6 +246,7 @@ public:
   }
 
   static void render() {
+    cursor_cur_pos = event_handler->pointer_pos;
     GameLoop::fixed_update();
 
     GameLoop::drawler->render();
@@ -248,19 +294,15 @@ public:
 
 //* Пример создания частиц:
 void EventHandler::on_mouse_motion(Position pos) {
-  
   pointer_pos = pos;
   if (control.get_space()) {
+    //todo интерполяция не распростряняется на этот режим
     int hash = window_config.pos_to_hash(pointer_pos);
     auto res = GameLoop::clear_particle(hash);
     if (res.first != 0) {
       game_loop.drawler->clear_pixel(hash);
     };
-    if (Particle::create_new( pointer_pos, 0 )) {
-      auto c = Color::random();
-      std::cout << static_cast<int>(c.r) << " | " << static_cast<int>(c.g) << " | " << static_cast<int>(c.b) << std::endl;
-      game_loop.drawler->draw_pixel(pos, c);
-    };
+    GameLoop::interpolateController(pointer_pos, 0);
   };
 }
 
