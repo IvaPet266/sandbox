@@ -149,7 +149,7 @@ public:
         auto res = clear_particle(hash);
         drawler->clear_pixel(hash);
       }
-    } while (cur_pos.x != target_pos.x && cur_pos.y != target_pos.y);
+    } while (not (cur_pos.x == target_pos.x && cur_pos.y == target_pos.y));
     cursor_cur_pos = target_pos;
   };
 

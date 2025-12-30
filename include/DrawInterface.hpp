@@ -1,8 +1,11 @@
 // #include <SDL2/SDL_render.h>
 
 #include "Position.hpp"
+#include "SDL2/SDL_video.h"
 #include <WindowConfig.hpp>
 #include <Color.hpp>
+#include <iostream>
+#include <memory>
 
 
 #pragma once
@@ -12,7 +15,7 @@ class DrawInterface {
 
 private:
 
-  SDL_Window   *      window       = nullptr;  // — окно программы.
+  std::shared_ptr<SDL_Window>  window = nullptr;  // — окно программы.
   SDL_Renderer *      renderer     = nullptr;  // — рендерер (контекст отрисовки).
   SDL_Texture  *      texture      = nullptr;  // — текстура для отображения пискелей.
 
@@ -27,22 +30,28 @@ public:
 
   DrawInterface(WindowConfig & window_config) : window_config(window_config) {
 
-    window = SDL_CreateWindow(
-        "Partciles", 
-        SDL_WINDOWPOS_CENTERED, // — окно откроется ровно
-        SDL_WINDOWPOS_CENTERED, //   в центре экрана.
-        
-        window_config.window_w, 
-        window_config.window_h,
-
-        SDL_WINDOW_SHOWN
+    window = std::shared_ptr<SDL_Window>(
+      SDL_CreateWindow(
+          "Partciles", 
+          SDL_WINDOWPOS_CENTERED, // — окно откроется ровно
+          SDL_WINDOWPOS_CENTERED, //   в центре экрана.
+          
+          window_config.window_w, 
+          window_config.window_h,
+  
+          SDL_WINDOW_SHOWN
+      ),
+      [] (SDL_Window* wnd) {
+        std::cout << "DELETE WINDOW\n";
+        SDL_DestroyWindow(wnd);
+      }
     );
 
 
     if (window) {
         
         renderer = SDL_CreateRenderer(
-            window,
+            window.get(),
             -1,
             SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
 //                                       ^    ^
@@ -91,7 +100,7 @@ public:
     SDL_FreeFormat      (pixel_format);
     SDL_DestroyTexture  (texture);
     SDL_DestroyRenderer (renderer);
-    SDL_DestroyWindow   (window);
+    // SDL_DestroyWindow   (window);
     
     // Для проверки работы "умного" указателя:
     // print("DESTRUCTOR DrawInterface");
