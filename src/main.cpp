@@ -115,7 +115,10 @@ public:
         drawler->draw_pixel( pix_pos, { .r = 255 });
       } else if (control.get_particle_code() == 2) {
         drawler->draw_pixel( pix_pos, { .g = 255 });
+      } else if (control.get_particle_code() == 3) {
+        drawler->draw_pixel( pix_pos, { .r = 255, .g = 255 });
       } 
+      
       // else if (control.get_particle_code() == 3) {
       //   drawler->draw_pixel( pix_pos, { .r = 255, .g = 255 });
       // }
@@ -189,8 +192,8 @@ public:
     //     it->second.behaviour(it);
     //   }
     // } else 
-    if ( control.get_lmb() ) {
-      if ( control.get_lctrl() ) {
+    if ( control.get_lmb() ) { // лкм нажата
+      if ( control.get_lctrl() ) { // заимствование класса частицы
         auto res_clear = clear_particle(hash);
         if (res_clear.first != 0) {
           control.set_particle_code((control.get_particle_code() + 1) % PART_TYPES_AMOUNT);
@@ -199,35 +202,46 @@ public:
       };
       // create_type();
       GameLoop::interpolateController(event_handler->pointer_pos, 1);
-    } else if ( control.get_rmb() ) {
+    } else if ( control.get_rmb() ) { // очищение частиц на пкм
       // print("clear");
       
       // auto res = clear_particle(hash);
       // drawler->clear_pixel(hash);
       GameLoop::interpolateController(event_handler->pointer_pos, 2);
-    } else if ( control.get_r() ) {
+    } else if ( control.get_r() ) { // случайное заполнение экрана
       if ( control.get_shift() ) {
         Particle::clear();
       };
+
       std::srand(std::time(0));
+
       Uint32 count = static_cast<Uint32>(std::rand() % 300);
+
       while (count == 0 || count <= 70) {
         count = static_cast<Uint32>(std::rand() % 300);
       };
+
       for (Uint32 _ = 0; _ <= count; ++_) {
         std::srand(std::time(0));
+
         Position new_pos {std::rand() % window_config.res_w, std::rand() % window_config.res_h};
+
         int c = Particle::_all.count(window_config.pos_to_hash(new_pos));
+
         std::srand(std::time(0));
+
         while (c != 0) {
           if (Particle::_all.size() == window_config.get_res_area()) {
             print("field is full!");
             return;
           };
+
           new_pos = Position(std::rand() % window_config.res_w, std::rand() % window_config.res_h);
+
           c = Particle::_all.count(window_config.pos_to_hash(new_pos));
         };
         std::srand(std::time(0));
+
         if (Particle::create_new( new_pos, 0 )) {
           auto c = Color::random();
           drawler->draw_pixel(new_pos, c);

@@ -62,9 +62,9 @@ public:
               if (control.get_particle_code() != 2) control.set_particle_code(2); //beh_levitating
               print("code", control.get_particle_code());
               break;
-            // case SDLK_3:
-            //   if (control.get_particle_code() != 3) control.set_particle_code(3); //beh_levitating-right
-            //   print("code", control.get_particle_code());
+            case SDLK_3:
+              if (control.get_particle_code() != 3) control.set_particle_code(3); //beh_limited_lifespan
+              print("code", control.get_particle_code());
               break;
             // case SDLK_r: // рандомное расположение частиц по нажатию
             //   control.set_r(true);

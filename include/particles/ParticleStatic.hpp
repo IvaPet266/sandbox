@@ -3,10 +3,13 @@
 #include "SDL2/SDL_stdinc.h"
 #include "WindowConfig.hpp"
 #include "control.hpp"
+#include <chrono>
 
 // #include <chrono>
+#include <iostream>
 #include <unordered_map>
 
+using namespace std::chrono;
 
 #define DEBUG 0
 
@@ -30,7 +33,7 @@ protected:
   // 2. typedef:
   typedef void (* Behaviour )(MapIterator&);                // — тип поведения частиц.
   
-  int  _type     = 0;
+  int _type = 0;
 
 private:
   static int check_floor(Position pos, MapIterator& it) {
@@ -72,7 +75,27 @@ protected:
 
     const Uint32 entry_color = drawler->get_pixel(pos_hash);
 
-    if (not drawler->window_config.pos_in_res(drawler->window_config.pos_to_hash(new_pos))) {
+    bool type3_ex = false;
+    if (iterator->second.get_type() == 3) { //старение частицы (3 вид)
+      auto now = steady_clock::now();
+      auto diff = now - iterator->second.birth;
+
+      if (diff >= 1000ms) {
+        iterator->second.lifetime--; // 
+        std::cout << "lifetime -> " << iterator->second.lifetime << "\n";
+      }
+      if (iterator->second.lifetime <= 0) { //
+        type3_ex = true;
+        std::cout << "dead\n";
+      }
+    }
+
+    if (
+      (
+        not drawler->window_config.pos_in_res(drawler->window_config.pos_to_hash(new_pos))
+      ) 
+      or type3_ex
+    ) {
       drawler->clear_pixel(pos_hash);
       _all.extract(iterator); 
 
@@ -113,6 +136,8 @@ public:
   Uint32    id             = 0;              //  — id для сравнения частиц.
   int inst_y               = 1;
   int inst_x               = 0;
+  int lifetime             = 5;
+  time_point<steady_clock> birth;
 
 
   // Статические поля:
@@ -126,7 +151,7 @@ public:
         inline static Uint32 id_counter     = 0; // — счётчик id.
 
 
-//region Конструкторы копирования:
+  // Конструкторы копирования:
   Particle(const Particle&)            = delete;
   Particle& operator=(const Particle&) = delete;
   
@@ -142,7 +167,6 @@ public:
     // Для отладки:
     print("PARTICLE DESTROY"); 
   }
-//endregion 
 
   int get_type() {
     return _type;
@@ -166,11 +190,11 @@ public:
   void upd_beh() {
     switch (_type) {
       case 1:
+      case 3:
         inst_y    = 1;
         behaviour = beh_falling;
         break;
       case 2:
-        // case 3:
         inst_y    = -1;
         behaviour = beh_falling;
         break;
@@ -207,14 +231,21 @@ public:
       switch (type) {
 
         case 1:
-          it->second.inst_y = 1;
+          it->second.inst_y    = 1;
           it->second.behaviour = beh_falling;
           _dynPart.emplace_back(pos_hash); //<-
           break;
         case 2:
           // case 3:
-          it->second.inst_y = -1;
+          it->second.inst_y    = -1;
           it->second.behaviour = beh_falling;
+          _dynPart.emplace_back(pos_hash); //<-
+          break;
+        case 3:
+          it->second.inst_y    = 1;
+          it->second.behaviour = beh_falling;
+          it->second.birth     = steady_clock::now();
+          it->second.lifetime  = 5;
           _dynPart.emplace_back(pos_hash); //<-
           break;
         default: //0
