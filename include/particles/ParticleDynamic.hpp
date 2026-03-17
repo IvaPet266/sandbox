@@ -47,7 +47,7 @@ public:
                 
                 } else if (p_type == particle_t::t_levitating) {
     
-                }
+                } else if (p_type == particle_t::t_void || p_type == particle_t::t_monolit) {continue;}
             }
         }
     }
