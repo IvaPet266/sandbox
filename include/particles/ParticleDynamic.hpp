@@ -3,8 +3,9 @@
 #include <cstdint>
 #include <iostream>
 
+using p_type_t = uint8_t;
 
-enum class particle_t : uint8_t {
+enum class particle_t : p_type_t {
     t_void,
     t_monolit,
     t_falling,
@@ -16,7 +17,7 @@ enum class particle_t : uint8_t {
 
 class Game {
 public:
-    using parsedParticle_t = std::array<uint8_t, 3>;
+    using parsedParticle_t = std::array<particle_t, 4>;
     using p_chank_t        = uint32_t;
 private:
     // WindowConfig window;
@@ -27,12 +28,12 @@ private:
     {
         parsedParticle_t result;
     
-        constexpr p_chank_t MASK = 0b111;
+        constexpr uint32_t MASK = 0b111;
     
-        for (uint8_t i = 0; i < 4; ++i)
+        for (p_type_t i = 0; i < 4; ++i)
         {
-            uint8_t type = (p_chank >> (i * 3)) & MASK;
-            result[i] = type;
+            p_type_t type = (p_chank >> (i * 3)) & MASK;
+            result[i] = static_cast<particle_t>(type);
         }
         return result;
     }
