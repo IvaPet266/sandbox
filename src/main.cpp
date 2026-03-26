@@ -3,13 +3,18 @@
 #include <EventTriggers.hpp>
 // #include "../text/text.cpp"
 #include "Position.hpp"
-#include "particles/ParticleStatic.hpp"
 
 // Есть 2 реализации:
 #include <cstddef>
 #include <cstdio>
 #include <iostream>
 
+#define part_dyn 
+#ifdef part_dyn 
+#include "particles/ParticleDynamic1.hpp"
+#else
+#include "particles/ParticleStatic.hpp"
+#endif
 
 using namespace std::chrono;
 
