@@ -3,18 +3,28 @@
 #include <EventTriggers.hpp>
 // #include "../text/text.cpp"
 #include "Position.hpp"
+#include "SDL2/SDL_stdinc.h"
+#include "control.hpp"
+#include "print/c8_prints.hpp"
 
 // Есть 2 реализации:
 #include <cstddef>
+#include <cstdint>
 #include <cstdio>
 #include <iostream>
+#include <algorithm>
 
-#define part_dyn 
-#ifdef part_dyn 
-#include "particles/ParticleDynamic1.hpp"
-#else
-#include "particles/ParticleStatic.hpp"
+#define CMAKE_DEFINE
+
+#ifndef CMAKE_DEFINE
+  #define part_dyn=1
 #endif
+
+// #if defined(part_dyn) && part_dyn != 0 
+//   #include "particles/ParticleDynamic1.hpp"
+// #else
+//   #include "particles/ParticleStatic.hpp"
+// #endif
 
 using namespace std::chrono;
 
@@ -33,8 +43,8 @@ public:
 
 
   void on_mouse_motion( Position pos )          override;
-  void on_mouse_button_down( Uint8 btn_number ) override;
-  void on_mouse_button_up( Uint8 btn_number )   override;
+  void on_mouse_button_down( uint8_t btn_number ) override;
+  void on_mouse_button_up( uint8_t btn_number )   override;
   void on_key_down(int btn_number)              override;
   void on_key_up(int btn_number)                override;
 };
@@ -114,13 +124,14 @@ public:
       pix_pos = event_handler->pointer_pos;
     }
     if ( Particle::create_new( pix_pos, control.get_particle_code() ) ) {
-      if (control.get_particle_code() == 0) {
+      if (control.get_particle_code() == particle_t::t_monolit) {
+        std::cout << "monolit\n";
         drawler->draw_pixel( pix_pos, { .b = 255 });
-      } else if (control.get_particle_code() == 1) {
+      } else if (control.get_particle_code() == particle_t::t_falling) {
         drawler->draw_pixel( pix_pos, { .r = 255 });
-      } else if (control.get_particle_code() == 2) {
+      } else if (control.get_particle_code() == particle_t::t_levitating) {
         drawler->draw_pixel( pix_pos, { .g = 255 });
-      } else if (control.get_particle_code() == 3) {
+      } else if (control.get_particle_code() == particle_t::t_living_fast) {
         drawler->draw_pixel( pix_pos, { .r = 255, .g = 255 });
       } 
       
@@ -145,7 +156,7 @@ public:
       cur_pos = new_pos;
 
       if ( mode == 0 ) {
-        if (Particle::create_new( cur_pos, 0 )) {
+        if (Particle::create_new( cur_pos, particle_t::t_monolit )) {
           auto c = Color::random();
           std::cout << static_cast<int>(c.r) << " | " << static_cast<int>(c.g) << " | " << static_cast<int>(c.b) << std::endl;
           GameLoop::drawler->draw_pixel(target_pos, c);
@@ -161,28 +172,41 @@ public:
     cursor_cur_pos = target_pos;
   };
 
-  static std::pair<Uint32, Uint8> clear_particle(int hash) {
-    Uint8  type      = 0;
-    Uint32 del_count = 0;
-    auto dyn_it = std::find(
-      Particle::_dynPart.begin(), 
-      Particle::_dynPart.end(), 
-      hash
-    );
-    if (dyn_it != Particle::_dynPart.end()) { 
-      Particle::_dynPart.erase(dyn_it);
-    };
-
-    for (auto it = Particle::_all.begin(); it != Particle::_all.end(); ) {
-      if (it->first == hash) {
-        type = it->second.get_type();
-        it = Particle::_all.erase(it);
-        del_count++;
-      } else {
-        ++it;
+  static std::pair<uint32_t, uint8_t> clear_particle(size_t hash) {
+    uint8_t  type      = 0;
+    uint32_t del_count = 0;
+    #if part_dyn!=0
+      //todo
+      if (hash < Particle::get_all_size()) {
+        particle_t part = Particle::_all[hash];
+        if (part != particle_t::t_void) {
+          type = static_cast<uint8_t>(part);
+          Particle::_all[hash] = particle_t::t_void;
+          del_count++;
+        };
+      }
+    #else
+      auto dyn_it = std::find(
+        Particle::_dynPart.begin(), 
+        Particle::_dynPart.end(), 
+        hash
+      );
+      if (dyn_it != Particle::_dynPart.end()) { 
+        Particle::_dynPart.erase(dyn_it);
       };
-    };
-    return std::pair<Uint32, Uint8> {del_count, type};
+
+      for (auto it = Particle::_all.begin(); it != Particle::_all.end(); ) {
+        if (it->first == hash) {
+          type = static_cast<uint8_t>(it->second.get_type());
+          it = Particle::_all.erase(it);
+          del_count++;
+        } else {
+          ++it;
+        };
+      };
+    #endif
+
+    return std::pair<uint32_t, uint8_t> {del_count, type};
   }
 
   static void update() { // — максимум кадров в секунду.
@@ -201,7 +225,7 @@ public:
       if ( control.get_lctrl() ) { // заимствование класса частицы
         auto res_clear = clear_particle(hash);
         if (res_clear.first != 0) {
-          control.set_particle_code((control.get_particle_code() + 1) % PART_TYPES_AMOUNT);
+          control.set_particle_code(static_cast<particle_t>((static_cast<uint8_t>(control.get_particle_code()) + 2) % PART_TYPES_AMOUNT));
           // print("particle_code", (control.get_particle_code() + 1) % (PART_TYPES_AMOUNT - 1));
         };
       };
@@ -220,34 +244,40 @@ public:
 
       std::srand(std::time(0));
 
-      Uint32 count = static_cast<Uint32>(std::rand() % 300);
+      uint32_t count = static_cast<uint32_t>(std::rand() % 300);
 
       while (count == 0 || count <= 70) {
-        count = static_cast<Uint32>(std::rand() % 300);
+        count = static_cast<uint32_t>(std::rand() % 300);
       };
 
-      for (Uint32 _ = 0; _ <= count; ++_) {
+      for (uint32_t _ = 0; _ <= count; ++_) {
         std::srand(std::time(0));
 
         Position new_pos {std::rand() % window_config.res_w, std::rand() % window_config.res_h};
-
-        int c = Particle::_all.count(window_config.pos_to_hash(new_pos));
-
+        #if part_dyn!=0
+          int c = std::count(Particle::_all.begin(), Particle::_all.end(), static_cast<particle_t>(window_config.pos_to_hash(new_pos)));
+        #else
+          int c = Particle::_all.find(window_config.pos_to_hash(new_pos)) != Particle::_all.end();
+        #endif
         std::srand(std::time(0));
 
         while (c != 0) {
-          if (Particle::_all.size() == window_config.get_res_area()) {
+          if (Particle::get_all_size() == window_config.get_res_area()) {
             print("field is full!");
             return;
           };
 
           new_pos = Position(std::rand() % window_config.res_w, std::rand() % window_config.res_h);
-
-          c = Particle::_all.count(window_config.pos_to_hash(new_pos));
+          #if part_dyn!=0
+            int c = std::count(Particle::_all.begin(), Particle::_all.end(), static_cast<particle_t>(window_config.pos_to_hash(new_pos)));
+          #else
+            auto c = Particle::_all.find(window_config.pos_to_hash(new_pos));
+          #endif
+          // c = std::count(Particle::_all.begin(), Particle::_all.end(), static_cast<particle_t>(window_config.pos_to_hash(new_pos)));
         };
         std::srand(std::time(0));
 
-        if (Particle::create_new( new_pos, 0 )) {
+        if (Particle::create_new( new_pos, particle_t::t_monolit )) {
           auto c = Color::random();
           drawler->draw_pixel(new_pos, c);
         };
@@ -257,11 +287,12 @@ public:
     // Обновление частиц:
     Particle::update_all();
   }
-
   static void fixed_update() { // — 60 кадров в секунду.
-
-    // Торможение частиц:
-    Particle::frame_step();
+    #ifdef part_dyn
+    #else
+      // Торможение частиц:
+      Particle::frame_step();
+    #endif
   }
 
   static void render() {
@@ -325,7 +356,7 @@ void EventHandler::on_mouse_motion(Position pos) {
   };
 }
 
-void EventHandler::on_mouse_button_down(Uint8 btn_number) {
+void EventHandler::on_mouse_button_down(uint8_t btn_number) {
   // if (game_loop.get_start_off() == false && game_loop.get_start() == true) game_loop.set_start_off(true);
 
   switch (btn_number) {
@@ -340,7 +371,7 @@ void EventHandler::on_mouse_button_down(Uint8 btn_number) {
   };
 };
 
-void EventHandler::on_mouse_button_up(Uint8 btn_number) {
+void EventHandler::on_mouse_button_up(uint8_t btn_number) {
 
   switch (btn_number) {
 
@@ -373,8 +404,16 @@ void EventHandler::on_key_up(int btn_munber) {
 
 // SDL2 требует именно такую сигнатуру `main`:
 int main( int argc, char *argv[] ) {
-      
-  setlocale(LC_ALL, "UTF8");
+
+  #if defined(part_dyn) && part_dyn != 0 
+  std::cout << "part_dynamic\n";
+  #else
+  std::cout << "part_static\n";
+  #endif
+
+  use_namespace(locale)
+  change_locale();
+  
   std::cout << std::setprecision(17) << std::fixed;
 
   int exit_code = EXIT_SUCCESS;

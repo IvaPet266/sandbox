@@ -6,12 +6,11 @@
 #include <chrono>
 
 // #include <chrono>
+#include <cstddef>
 #include <iostream>
 #include <unordered_map>
 
 using namespace std::chrono;
-
-#define DEBUG 0
 
 #if DEBUG
   #include <stdexcept>
@@ -32,8 +31,8 @@ protected:
   // typedef ParticleMap::iterator MapIterator;
   // 2. typedef:
   typedef void (* Behaviour )(MapIterator&);                // — тип поведения частиц.
-  
-  int _type = 0;
+
+  particle_t _type = particle_t::t_monolit;
 
 private:
   static int check_floor(Position pos, MapIterator& it) {
@@ -76,7 +75,7 @@ protected:
     const Uint32 entry_color = drawler->get_pixel(pos_hash);
 
     bool type3_ex = false;
-    if (iterator->second.get_type() == 3) { //старение частицы (3 вид)
+    if (iterator->second.get_type() == particle_t::t_living_fast) { //старение частицы (3 вид)
       auto now = steady_clock::now();
       auto diff = now - iterator->second.birth;
 
@@ -168,13 +167,18 @@ public:
     print("PARTICLE DESTROY"); 
   }
 
-  int get_type() {
+  particle_t get_type() {
     return _type;
   };
   
-  void set_type(int new_type) {
+  void set_type(particle_t new_type) {
     _type = new_type;
   };
+
+  inline static size_t get_all_size() {
+    return _all.size();
+  };
+
   static void frame_step() {
 
     for ( MapIterator it = _all.begin(); it != _all.end(); ++it ) {
@@ -189,12 +193,12 @@ public:
 
   void upd_beh() {
     switch (_type) {
-      case 1:
-      case 3:
+      case particle_t::t_falling:
+      case particle_t::t_living_fast:
         inst_y    = 1;
         behaviour = beh_falling;
         break;
-      case 2:
+      case particle_t::t_levitating:
         inst_y    = -1;
         behaviour = beh_falling;
         break;
@@ -207,7 +211,7 @@ public:
 
   static bool create_new(
     Position pos, 
-    Uint8 type = 0
+    particle_t type = particle_t::t_monolit
   ) {
     
     #if DEBUG
@@ -230,25 +234,25 @@ public:
       // Поведение сущности:
       switch (type) {
 
-        case 1:
+        case particle_t::t_falling:
           it->second.inst_y    = 1;
           it->second.behaviour = beh_falling;
           _dynPart.emplace_back(pos_hash); //<-
           break;
-        case 2:
+        case particle_t::t_levitating:
           // case 3:
           it->second.inst_y    = -1;
           it->second.behaviour = beh_falling;
           _dynPart.emplace_back(pos_hash); //<-
           break;
-        case 3:
+        case particle_t::t_living_fast:
           it->second.inst_y    = 1;
           it->second.behaviour = beh_falling;
           it->second.birth     = steady_clock::now();
           it->second.lifetime  = 5;
           _dynPart.emplace_back(pos_hash); //<-
           break;
-        default: //0
+        default: //2
           it->second.behaviour = beh_monolit;
           // TODO
           break;
@@ -305,7 +309,7 @@ public:
 
   static void init(WindowConfig * wind_config, DrawInterface * drawler) {
     
-    #if DEBUG
+    #if DEBUG!=0
       if ( not wind_config ) throw std::invalid_argument("Particle :: init :: nullptr WindowConfig");
     #endif
 

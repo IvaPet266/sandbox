@@ -14,7 +14,7 @@
 
 set(VAR_PROJECT_NAME "Proj" CACHE STRING "Название проекта")
 
-set(VAR_TEST ON CACHE BOOL ON)
+set(VAR_TEST 0 CACHE BOOL "Включить тесты")
 
 set(SDL2_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/libs/SDL2") 
 
@@ -59,8 +59,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/executable/")
 file(GLOB_RECURSE VAR_EXECUTABLE "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 add_executable(${PROJECT_NAME} ${VAR_EXECUTABLE})
 
-if (VAR_TEST)
-  message("TEST")
+target_compile_definitions(${PROJECT_NAME} PRIVATE CMAKE_DEFINE=1 part_dyn=1 DEBUG=0)
+
+if (${VAR_TEST} EQUAL 1)
+  message("TEST1")
   file(GLOB_RECURSE VAR_EXECUTABLE_TEST "${CMAKE_CURRENT_SOURCE_DIR}/tests/*.cpp")
   add_executable(${TEST} ${VAR_EXECUTABLE_TEST})
   target_include_directories(${TEST} PRIVATE
@@ -124,7 +126,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 # Пути include:
 # include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 # include_directories(${SDL2_LIB_PATH}/include)
-message(${TEST})
+# message(${TEST})
 target_include_directories(${PROJECT_NAME} PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/include"
     "${SDL2_LIB_PATH}/include"

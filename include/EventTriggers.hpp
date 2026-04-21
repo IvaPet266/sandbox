@@ -1,7 +1,15 @@
 #include <SDL2/SDL_events.h>
+#include <cstdint>
 
-#include "particles/ParticleStatic.hpp"
+#include "control.hpp"
+#include "defines.hpp"
+#include "WindowConfig.hpp"
 
+#if defined(part_dyn) && part_dyn==1 
+  #include "particles/ParticleDynamic1.hpp"
+#else
+  #include "particles/ParticleStatic.hpp"
+#endif
 
 #pragma once
 
@@ -48,23 +56,23 @@ public:
               if (not control.get_lctrl()) control.set_lctrl(true);
               break;
             case SDLK_i:
-              print("particles amount", Particle::_all.size());
+              print("particles amount", Particle::get_all_size());
               break;
             case SDLK_0:
-              if (control.get_particle_code() != 0) control.set_particle_code(0); //beh_monolit
-              print("code", control.get_particle_code());
+              if (control.get_particle_code() != particle_t::t_monolit) control.set_particle_code(particle_t::t_monolit);         //beh_monolit
+              print("code", static_cast<uint8_t>(control.get_particle_code()));
               break;
             case SDLK_1:
-              if (control.get_particle_code() != 1) control.set_particle_code(1); //beh_falling
-              print("code", control.get_particle_code());
+              if (control.get_particle_code() != particle_t::t_falling) control.set_particle_code(particle_t::t_falling);         //beh_falling
+              print("code", static_cast<uint8_t>(control.get_particle_code()));
               break;
             case SDLK_2:
-              if (control.get_particle_code() != 2) control.set_particle_code(2); //beh_levitating
-              print("code", control.get_particle_code());
+              if (control.get_particle_code() != particle_t::t_levitating) control.set_particle_code(particle_t::t_levitating);   //beh_levitating
+              print("code", static_cast<uint8_t>(control.get_particle_code()));
               break;
             case SDLK_3:
-              if (control.get_particle_code() != 3) control.set_particle_code(3); //beh_limited_lifespan
-              print("code", control.get_particle_code());
+              if (control.get_particle_code() != particle_t::t_living_fast) control.set_particle_code(particle_t::t_living_fast); //beh_living_fast
+              print("code", static_cast<uint8_t>(control.get_particle_code()));
               break;
             // case SDLK_r: // рандомное расположение частиц по нажатию
             //   control.set_r(true);
