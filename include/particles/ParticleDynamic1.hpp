@@ -71,10 +71,24 @@ private:
     };
 
 public:
+    // Конструкторы копирования:
+    Particle(const Particle&)            = delete;
+    Particle& operator=(const Particle&) = delete;
 
+    // Конструкторы перемещения:
+    Particle(Particle&&)            = default;
+    Particle& operator=(Particle&&) = default;
+
+    // Конструктор:
     Particle() {
         _all.resize(drawler->window_config.get_res_area(), particle_t::t_void);
     };
+
+    // Деструктор:
+    ~Particle() {
+        // Для отладки:
+        print("PARTICLE DESTROY"); 
+    }
 
     static void update_all() {
         size_t c = 0;
@@ -117,12 +131,15 @@ public:
         //TODO 
         Uint16 s = _all.size();
         auto st_time = std::chrono::high_resolution_clock().now();
-        _all.clear();
+        for (auto el : _all) {
+            el = particle_t::t_void;
+        };
+
         drawler->clear_buffer();
 
         print("clear");
         auto end_time = std::chrono::high_resolution_clock().now();
-        auto dur = end_time- st_time; //std::chrono::duration_cast<std::chrono::microseconds>(end_time - st_time);
+        auto dur = end_time-st_time; //std::chrono::duration_cast<std::chrono::microseconds>(end_time - st_time);
         print("clear time", dur);
         print("particles cleared", s);
     };

@@ -12,7 +12,7 @@
 
 # Установка вводных переменных:
 
-set(VAR_PROJECT_NAME "Proj" CACHE STRING "Название проекта")
+set(VAR_PROJECT_NAME "ParticlesGame" CACHE STRING "Название проекта")
 
 set(VAR_TEST 0 CACHE BOOL "Включить тесты")
 
@@ -59,7 +59,10 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/executable/")
 file(GLOB_RECURSE VAR_EXECUTABLE "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 add_executable(${PROJECT_NAME} ${VAR_EXECUTABLE})
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE CMAKE_DEFINE=1 part_dyn=1 DEBUG=0)
+set(static 0)
+set(dynamic 1)
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE USE_DYN=${${USE_DYN}} DEBUG=0)
 
 if (${VAR_TEST} EQUAL 1)
   message("TEST1")
@@ -141,3 +144,17 @@ add_custom_target(build_test
   DEPENDS ${TEST}
   COMMENT "test build"
 )
+
+file(
+  CREATE_LINK 
+  ${CMAKE_BINARY_DIR}/compile_commands.json
+  ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json
+  SYMBOLIC
+)
+
+# file(
+#   COPY
+#   ${CMAKE_BINARY_DIR}/compile_commands.json
+#   DESTINATION
+#   ${CMAKE_CURRENT_SOURCE_DIR}
+# )

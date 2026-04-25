@@ -14,17 +14,9 @@
 #include <iostream>
 #include <algorithm>
 
-#define CMAKE_DEFINE
 
-#ifndef CMAKE_DEFINE
-  #define part_dyn=1
-#endif
 
-// #if defined(part_dyn) && part_dyn != 0 
-//   #include "particles/ParticleDynamic1.hpp"
-// #else
-//   #include "particles/ParticleStatic.hpp"
-// #endif
+
 
 using namespace std::chrono;
 
@@ -175,7 +167,7 @@ public:
   static std::pair<uint32_t, uint8_t> clear_particle(size_t hash) {
     uint8_t  type      = 0;
     uint32_t del_count = 0;
-    #if part_dyn!=0
+    #if part_dyn == 1
       //todo
       if (hash < Particle::get_all_size()) {
         particle_t part = Particle::_all[hash];
@@ -254,7 +246,7 @@ public:
         std::srand(std::time(0));
 
         Position new_pos {std::rand() % window_config.res_w, std::rand() % window_config.res_h};
-        #if part_dyn!=0
+        #if part_dyn==1
           int c = std::count(Particle::_all.begin(), Particle::_all.end(), static_cast<particle_t>(window_config.pos_to_hash(new_pos)));
         #else
           int c = Particle::_all.find(window_config.pos_to_hash(new_pos)) != Particle::_all.end();
@@ -268,7 +260,7 @@ public:
           };
 
           new_pos = Position(std::rand() % window_config.res_w, std::rand() % window_config.res_h);
-          #if part_dyn!=0
+          #if part_dyn==1
             int c = std::count(Particle::_all.begin(), Particle::_all.end(), static_cast<particle_t>(window_config.pos_to_hash(new_pos)));
           #else
             auto c = Particle::_all.find(window_config.pos_to_hash(new_pos));

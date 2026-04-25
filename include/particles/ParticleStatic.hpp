@@ -299,7 +299,7 @@ public:
 
     print("clear");
     auto end_time = std::chrono::high_resolution_clock().now();
-    auto dur = end_time- st_time; //std::chrono::duration_cast<std::chrono::microseconds>(end_time - st_time);
+    auto dur = end_time-st_time; //std::chrono::duration_cast<std::chrono::microseconds>(end_time - st_time);
     print("clear time", dur);
     print("particles cleared", s);
   };

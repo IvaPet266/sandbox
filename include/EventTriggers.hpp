@@ -5,9 +5,13 @@
 #include "defines.hpp"
 #include "WindowConfig.hpp"
 
-#if defined(part_dyn) && part_dyn==1 
+#if ! defined(USE_DYN)
+  #error "USE_DYN undefined"
+#elif USE_DYN == 1
+  #define part_dyn 1
   #include "particles/ParticleDynamic1.hpp"
 #else
+  #define part_dyn 0
   #include "particles/ParticleStatic.hpp"
 #endif
 
