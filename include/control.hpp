@@ -9,6 +9,13 @@
 
 #pragma once
 
+enum class bitwise_operations_t : uint8_t {
+    t_and = 0,
+    t_or  = 1,
+    t_xor = 2
+};
+
+
 enum class particle_t : uint8_t {
     t_void        = 0,
     t_changed     = 1,
@@ -16,12 +23,21 @@ enum class particle_t : uint8_t {
     t_falling     = 4,
     t_levitating  = 6, 
     t_living_fast = 8,
+
+    t_update      = 128 // - 10000000
 };
 
-enum class bitwise_operations_t : uint8_t {
-    t_and = 0,
-    t_or  = 1,
-    t_xor = 2
+inline static particle_t parse_particle(particle_t p, const particle_t bit, bitwise_operations_t op = bitwise_operations_t::t_or) {
+    switch (op) {
+        case bitwise_operations_t::t_and:
+            return static_cast<particle_t>(static_cast<uint8_t>(p) & static_cast<uint8_t>(bit));
+        case bitwise_operations_t::t_or:
+            return static_cast<particle_t>(static_cast<uint8_t>(p) | static_cast<uint8_t>(bit));
+        case bitwise_operations_t::t_xor:
+            return static_cast<particle_t>(static_cast<uint8_t>(p) ^ static_cast<uint8_t>(bit));
+        default:
+            return p;
+    }
 };
 
 class Control {

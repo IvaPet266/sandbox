@@ -15,9 +15,6 @@
 #include <algorithm>
 
 
-
-
-
 using namespace std::chrono;
 
 
@@ -167,7 +164,7 @@ public:
   static std::pair<uint32_t, uint8_t> clear_particle(size_t hash) {
     uint8_t  type      = 0;
     uint32_t del_count = 0;
-    #if part_dyn == 1
+    #if part_dyn==1
       //todo
       if (hash < Particle::get_all_size()) {
         particle_t part = Particle::_all[hash];
@@ -280,11 +277,7 @@ public:
     Particle::update_all();
   }
   static void fixed_update() { // — 60 кадров в секунду.
-    #ifdef part_dyn
-    #else
-      // Торможение частиц:
-      Particle::frame_step();
-    #endif
+    Particle::frame_step();
   }
 
   static void render() {

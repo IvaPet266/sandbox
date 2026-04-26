@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <iostream>
 #include <vector>
 
@@ -13,20 +14,6 @@
 
 const uint8_t RES_W = 100;
 const uint8_t RES_H = 100;
-
-
-inline static particle_t parse_particle(particle_t p, const particle_t bit, bitwise_operations_t op = bitwise_operations_t::t_or) {
-    switch (op) {
-        case bitwise_operations_t::t_and:
-            return static_cast<particle_t>(static_cast<uint8_t>(p) & static_cast<uint8_t>(bit));
-        case bitwise_operations_t::t_or:
-            return static_cast<particle_t>(static_cast<uint8_t>(p) | static_cast<uint8_t>(bit));
-        case bitwise_operations_t::t_xor:
-            return static_cast<particle_t>(static_cast<uint8_t>(p) ^ static_cast<uint8_t>(bit));
-        default:
-            return p;
-    }
-};
 
 
 class Particle {
@@ -93,6 +80,12 @@ public:
     static void update_all() {
         size_t c = 0;
         for (particle_t p_type : _all) {
+            const bool update = static_cast<uint8_t>(p_type) & static_cast<uint8_t>(particle_t::t_update);
+            if (update) {
+                p_type = parse_particle(p_type, particle_t::t_update, bitwise_operations_t::t_xor);
+                return;
+            };
+
             const bool changed = static_cast<uint8_t>(p_type) & static_cast<uint8_t>(particle_t::t_changed);
             if (!changed) {
                 p_type = static_cast<particle_t>((static_cast<uint8_t>(p_type) >> 1) << 1);
@@ -126,6 +119,12 @@ public:
     inline static size_t get_all_size() {
         return _all.size();
     };
+
+    static void frame_step() {
+        for (auto el : _all) {
+            el = parse_particle(el, particle_t::t_update, bitwise_operations_t::t_or);
+        }
+    }
 
     static void clear() {
         //TODO 

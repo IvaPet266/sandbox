@@ -5,6 +5,7 @@
 #include <limits>
 #include <iostream>
 #include <ostream>
+#include <string>
 
 bool check_bit(uint8_t byte, int position) {
 
@@ -22,11 +23,14 @@ inline void cout_bytes(uint8_t number) {
 }
 
 enum class p : uint8_t {
-    t_void       = 0,
-    t_changed    = 1,
-    t_monolit    = 2,
-    t_falling    = 4,
-    t_levitating = 6
+    t_void        = 0,
+    t_changed     = 1,
+    t_monolit     = 2,
+    t_falling     = 4,
+    t_levitating  = 6, 
+    t_living_fast = 8,
+
+    t_update      = 128,
 };
 
 
@@ -38,20 +42,43 @@ int main() {
     //     }    
     // }
 
-    p n = p::t_monolit;
+    // p n = p::t_monolit;
     p n1 = p::t_falling;
-    p n2 = static_cast<p>(static_cast<uint8_t>(n1) | static_cast<uint8_t>(p::t_changed));
-    p n3 = static_cast<p>(static_cast<uint8_t>(n2) ^ static_cast<uint8_t>(p::t_changed));
+    // p n2 = static_cast<p>(static_cast<uint8_t>(n1) | static_cast<uint8_t>(p::t_changed));
+    // p n3 = static_cast<p>(static_cast<uint8_t>(n2) ^ static_cast<uint8_t>(p::t_changed));
+    p n4 = static_cast<p>(static_cast<uint8_t>(p::t_void)        | static_cast<uint8_t>(p::t_update));
+    p n7 = static_cast<p>(static_cast<uint8_t>(p::t_monolit)     | static_cast<uint8_t>(p::t_update));
+    p n5 = static_cast<p>(static_cast<uint8_t>(p::t_falling)     | static_cast<uint8_t>(p::t_update));
+    p n6 = static_cast<p>(static_cast<uint8_t>(p::t_levitating)  | static_cast<uint8_t>(p::t_update));
+    p n8 = static_cast<p>(static_cast<uint8_t>(p::t_living_fast) | static_cast<uint8_t>(p::t_update));
+
+
+
+    // cout_bytes(static_cast<uint8_t>(n4));
+    // cout_bytes(static_cast<uint8_t>(n5));
+    // cout_bytes(static_cast<uint8_t>(n6));
+    // cout_bytes(static_cast<uint8_t>(n7));
+    // cout_bytes(static_cast<uint8_t>(n8));
+
+    cout_bytes(static_cast<uint8_t>(n5) ^ static_cast<uint8_t>(p::t_update));
+    cout_bytes(static_cast<uint8_t>(p::t_falling) & static_cast<uint8_t>(p::t_update));
 
     // cout_bytes(static_cast<uint8_t>(n));
     // cout_bytes(static_cast<uint8_t>(n) | static_cast<uint8_t>(p::t_changed)); 
     // cout_bytes(static_cast<uint8_t>(n1));
-    cout_bytes(static_cast<uint8_t>(n2));
+    // cout_bytes(static_cast<uint8_t>(n2));
     // cout_bytes(static_cast<uint8_t>(n2) & ~static_cast<uint8_t>(p::t_changed));
-    cout_bytes(static_cast<uint8_t>(n3));
+    // cout_bytes(static_cast<uint8_t>(n3));
+    // cout_bytes(static_cast<uint8_t>(n4));
 
-    std::cout << (static_cast<uint8_t>(n2) & static_cast<uint8_t>(p::t_changed)) << std::endl;
-    std::cout << (static_cast<uint8_t>(n3) & static_cast<uint8_t>(p::t_changed)) << std::endl;
+    // std::cout << (static_cast<uint8_t>(n2) & static_cast<uint8_t>(p::t_changed)) << std::endl;
+    // std::cout << (static_cast<uint8_t>(n3) & static_cast<uint8_t>(p::t_changed)) << std::endl;
+
+    // for (uint8_t i = 0; i < 255; i++) {
+    //   std::cout << std::to_string(i) << " : ";
+    //   cout_bytes(i);
+    // }
+
     return 0;
 }
 
