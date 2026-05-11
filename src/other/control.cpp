@@ -1,7 +1,7 @@
 #include "SDL2/SDL_stdinc.h"
 
 #include "defines.hpp"
-#include <Timer.hpp>
+#include "Timer.hpp"
 #include <cstdint>
 
 #include "C:\Users\shosh\vscode_projects\cpp\1\tools\tools"

@@ -2,8 +2,8 @@
 
 #include "Position.hpp"
 #include "SDL2/SDL_video.h"
-#include <WindowConfig.hpp>
-#include <Color.hpp>
+#include "WindowConfig.hpp"
+#include "Color.hpp"
 #include <iostream>
 #include <memory>
 
@@ -15,9 +15,9 @@ class DrawInterface {
 
 private:
 
-  std::shared_ptr<SDL_Window>  window = nullptr;  // — окно программы.
-  SDL_Renderer *      renderer     = nullptr;  // — рендерер (контекст отрисовки).
-  SDL_Texture  *      texture      = nullptr;  // — текстура для отображения пискелей.
+  std::shared_ptr<SDL_Window>  window   = nullptr;  // — окно программы.
+  SDL_Renderer *               renderer = nullptr;  // — рендерер (контекст отрисовки).
+  SDL_Texture  *               texture  = nullptr;  // — текстура для отображения пискелей.
 
   std::vector<Uint32> pixel_buffer = {};       // — вектор расширяется по размеру текстуры.
   SDL_PixelFormat*    pixel_format = nullptr;  // — структура, хранящая данные о шифровании пикселей.
@@ -50,26 +50,26 @@ public:
 
     if (window) {
         
-        renderer = SDL_CreateRenderer(
-            window.get(),
-            -1,
-            SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
-//                                       ^    ^
-//          аппаратное ускорение отрисовки    вертикальная синхронизация
-        );
+      renderer = SDL_CreateRenderer(
+        window.get(),
+        -1,
+        SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
+//                                   ^    ^
+//      аппаратное ускорение отрисовки    вертикальная синхронизация
+      );
 
     } else throw std::runtime_error("Ошибка при создании `SDL_Window`");
 
 
     if (renderer) {
         
-        texture = SDL_CreateTexture(
-            renderer, 
-            SDL_PIXELFORMAT_RGBA8888,    // — 4 цветовых канала по 8 бит каждый.
-            SDL_TEXTUREACCESS_STREAMING, // — текстура будет часто изменяться.
-            window_config.res_w, 
-            window_config.res_h
-        );
+      texture = SDL_CreateTexture(
+        renderer, 
+        SDL_PIXELFORMAT_RGBA8888,    // — 4 цветовых канала по 8 бит каждый.
+        SDL_TEXTUREACCESS_STREAMING, // — текстура будет часто изменяться.
+        window_config.res_w, 
+        window_config.res_h
+      );
 
     } else throw std::runtime_error("Ошибка при создании `SDL_Renderer`");
 
@@ -152,24 +152,24 @@ public:
 
   void SDL_palette_gradient() {
 
-      // Чтобы увидеть, на сколько плавный
-      // цветовой переход доступен в `SDL_Palette`:
+    // Чтобы увидеть, на сколько плавный
+    // цветовой переход доступен в `SDL_Palette`:
 
-      for (Uint32 i = 0; i < pixel_buffer.size(); ++i) {
+    for (Uint32 i = 0; i < pixel_buffer.size(); ++i) {
 
-        pixel_buffer[i] = i;
-      }
+      pixel_buffer[i] = i;
+    }
 
   }
 
   void SDL_palette_step() {
 
-      // Чтобы увидеть оттенки в `SDL_Palette`:
+    // Чтобы увидеть оттенки в `SDL_Palette`:
 
-      for (Uint32 i = 0; i < pixel_buffer.size(); ++i) {
+    for (Uint32 i = 0; i < pixel_buffer.size(); ++i) {
 
-        pixel_buffer[i] = UINT32_MAX / (pixel_buffer.size() * 0.5) * i;  
-      }
+      pixel_buffer[i] = UINT32_MAX / (pixel_buffer.size() * 0.5) * i;  
+    }
 
   }
 

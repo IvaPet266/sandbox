@@ -3,7 +3,7 @@
 
 #include "control.hpp"
 #include "defines.hpp"
-#include "WindowConfig.hpp"
+#include "render/WindowConfig.hpp"
 
 #if ! defined(USE_DYN)
   #error "USE_DYN undefined"
